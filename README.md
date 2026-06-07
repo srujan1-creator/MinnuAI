@@ -77,7 +77,7 @@ MinnuAI/
 - **Database**: SQLite 3 (file-based, zero configuration)
 - **Frontend**: Vanilla HTML5 + CSS3 + JavaScript (no frameworks, no build step)
 - **Fonts**: Google Fonts — Inter, Outfit, Fira Code
-- **AI**: Gemini 1.5 Flash API (optional, for live chat responses)
+- **AI**: Gemini 2.5 Flash API (optional, for live chat responses)
 
 ---
 
