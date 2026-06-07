@@ -1,0 +1,8 @@
+# Minnu AI — Zero external dependencies!
+# All libraries used are part of Python's standard library:
+# - http.server, socketserver (web server)
+# - sqlite3 (database)
+# - hashlib (password hashing)
+# - json, os (utilities)
+
+# No packages to install — pure Python stdlib!

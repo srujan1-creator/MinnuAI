@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: minnu-ai
+    env: python
+    region: singapore
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python server.py"
+    envVars:
+      - key: PORT
+        value: 10000
+    healthCheckPath: /index.html

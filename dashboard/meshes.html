@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        // Session Guard
+        if (!localStorage.getItem("minnu_session")) {
+            window.location.href = "login.html";
+        }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minnu AI - Orchestration Meshes</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="style.css?v=1.1">
+    
+    <style>
+        .single-panel-layout {
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            transition: max-width 0.3s ease;
+        }
+        
+        @media (min-width: 900px) {
+            .single-panel-layout {
+                max-width: 800px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        
+        <div class="single-panel-layout">
+            <!-- Header Section -->
+            <header class="panel-header flex-column-start" style="border-radius: var(--radius-lg) var(--radius-lg) 0 0; border: 1px solid var(--border-color); border-bottom: none;">
+                <div class="brand-header-row">
+                    <div class="brand-logo-container">
+                        <!-- Phoenix SVG Symbol -->
+                        <svg class="brand-logo-svg" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M192 140C165 200 160 280 230 330C280 365 340 330 340 330C340 330 300 300 270 290C240 280 220 250 240 210C260 170 300 160 310 140C290 150 260 180 250 210C240 230 215 250 195 240C175 230 175 180 192 140Z" fill="#af5d33"/>
+                            <path d="M340 330C340 330 380 270 410 270C440 270 450 300 425 350C400 400 370 400 370 400" stroke="#af5d33" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M420 180C400 185 365 200 350 240C335 280 300 370 270 390C240 410 210 390 235 345C255 310 290 235 330 210" stroke="#213a57" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M398 185C408 170 428 172 428 172" stroke="#213a57" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M330 210C315 190 270 160 220 160" stroke="#213a57" stroke-width="24" stroke-linecap="round"/>
+                            <path d="M310 240C290 220 250 195 200 200" stroke="#213a57" stroke-width="24" stroke-linecap="round"/>
+                            <path d="M290 270C275 250 240 230 195 240" stroke="#213a57" stroke-width="24" stroke-linecap="round"/>
+                        </svg>
+                        <span class="brand-logo-text"><span class="text-minnu">Minnu</span> <span class="text-ai">AI</span></span>
+                    </div>
+                    <button class="profile-btn-red" aria-label="Profile Settings">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="active-user-badge" id="active-user-display" style="display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: var(--text-secondary); margin-top: -6px; font-weight: 500; user-select: none;">
+                    <span class="pulse-dot" style="width: 6px; height: 6px; background-color: var(--brand-copper); animation: dotPulse 2s infinite;"></span>
+                    Active Session: <strong id="active-user-name" style="color: var(--text-primary);">Admin Barista</strong> (<span id="active-user-role">Lead Orchestrator</span>)
+                </div>
+            </header>
+
+            <!-- Main Panel Content -->
+            <main class="panel middle-panel active-panel" style="flex: 1; border-top: none; border-radius: 0 0 var(--radius-lg) var(--radius-lg); width: 100%;">
+                <div class="panel-content">
+                    <div class="execution-title" style="display: flex; flex-direction: column; gap: 6px;">
+                        <div class="mesh-info" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span class="mesh-label">Mesh: Alpha</span>
+                                <span class="execution-badge animate-pulse">Active Execution</span>
+                            </div>
+                            <!-- Simulation Trigger Button -->
+                            <button class="btn btn-primary" id="deploy-mesh-btn" style="padding: 6px 12px; font-size: 0.75rem; margin: 0; width: auto; height: auto;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon" style="width: 12px; height: 12px;">
+                                    <polygon points="5 3 19 12 5 21 5 3"/>
+                                </svg>
+                                Deploy Mesh
+                            </button>
+                        </div>
+                        <h1 style="margin-top: 4px;">Core API Development</h1>
+                        <p class="subtitle">Real-time execution trace for the multi-agent task. Agents are collaborating to design, build, and verify the primary REST endpoints.</p>
+                    </div>
+
+                    <!-- Timeline flow container -->
+                    <div class="timeline-container" id="timeline-flow" style="margin-top: 16px;">
+                        
+                        <!-- Agent A Node -->
+                        <div class="timeline-node" id="node-agent-a">
+                            <div class="timeline-indicator">
+                                <div class="timeline-badge bg-badge-blue">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="12" cy="7" r="4"/>
+                                    </svg>
+                                </div>
+                                <div class="timeline-line"></div>
+                            </div>
+                            <div class="timeline-card card">
+                                <div class="timeline-card-header">
+                                    <div>
+                                        <span class="agent-role">Agent A (Product Manager)</span>
+                                        <span class="requirement-tag">&bull; Requirement Definition</span>
+                                    </div>
+                                    <span class="timestamp">10:02 AM</span>
+                                </div>
+                                <div class="timeline-card-body">
+                                    <h4>API Specification Requirements</h4>
+                                    <ul class="specs-list">
+                                        <li>Endpoint: <code>/api/v1/auth/token</code></li>
+                                        <li>Method: <strong>POST</strong></li>
+                                        <li>Input: JSON payload with client_id and client_secret</li>
+                                        <li>Output: JWT token with 1-hour expiration.</li>
+                                        <li>Error Handling: Standard 400/401 HTTP codes with structured JSON error response.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Agent B Node -->
+                        <div class="timeline-node" id="node-agent-b">
+                            <div class="timeline-indicator">
+                                <div class="timeline-badge bg-badge-red">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                        <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                                    </svg>
+                                </div>
+                                <div class="timeline-line"></div>
+                            </div>
+                            <div class="timeline-card card">
+                                <div class="timeline-card-header">
+                                    <div>
+                                        <span class="agent-role">Agent B (Developer)</span>
+                                        <span class="requirement-tag">&bull; Implementation</span>
+                                    </div>
+                                    <span class="timestamp">10:05 AM</span>
+                                </div>
+                                <div class="timeline-card-body">
+                                    <pre class="code-block-mock"><code>from fastapi import APIRouter, HTTP...
+from pydantic import BaseModel
+from datetime import datetime, time...
+import jwt
+
+router = APIRouter()
+SECRET_KEY = "phoenix_core_secret"
+ALGORITHM = "HS256"
+
+class TokenRequest(BaseModel):
+    client_id: str
+    client_secret: str
+
+@router.post("/api/v1/auth/token")
+async def generate_token(request: T...
+    if not verify_client(request.cl...
+        raise HTTPException(
+            status_code=401,
+            detail={"error": "inval...
+        )
+    
+    expires = datetime.utcnow() + t...
+    payload = {"sub": request.clien...
+    token = jwt.encode(payload, SEC...
+    
+    return {"access_token": token, ...</code></pre>
+                                    <div class="code-footer">
+                                        <span class="code-status-text">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="status-check-icon">
+                                                <polyline points="20 6 9 17 4 12"/>
+                                            </svg>
+                                            Code implementation complete.
+                                        </span>
+                                        <button class="view-diff-btn">View Diff</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Agent C Node -->
+                        <div class="timeline-node" id="node-agent-c">
+                            <div class="timeline-indicator">
+                                <div class="timeline-badge bg-badge-teal">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                        <line x1="9" y1="9" x2="15" y2="9"/>
+                                        <line x1="9" y1="13" x2="15" y2="13"/>
+                                        <line x1="9" y1="17" x2="13" y2="17"/>
+                                    </svg>
+                                </div>
+                                <div class="timeline-line hidden"></div>
+                            </div>
+                            <div class="timeline-card card">
+                                <div class="timeline-card-header">
+                                    <div>
+                                        <span class="agent-role">Agent C (QA Automation)</span>
+                                        <span class="requirement-tag">&bull; VerificationAM</span>
+                                    </div>
+                                    <span class="timestamp">10:08 AM</span>
+                                </div>
+                                <div class="timeline-card-body qa-refined-body">
+                                    <h3>All Test Suites Passed</h3>
+                                    <div class="qa-content-block">
+                                        <div class="qa-checkmark-box">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                <polyline points="20 6 9 17 4 12"/>
+                                            </svg>
+                                        </div>
+                                        <p class="qa-details-text">
+                                            Executed 14 unit tests and 3 integration tests covering valid payloads, expired tokens, and malformed requests. No regressions detected.
+                                        </p>
+                                    </div>
+                                    <div class="qa-card-footer">
+                                        <span class="qa-footer-left">Coverage: 98.2%</span>
+                                        <span class="qa-footer-right">Duration: 1.2s</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Execution Status Footer below Agent C card -->
+                    <div class="timeline-status-footer" id="timeline-status-msg" style="margin-top: 16px;">
+                        <span class="status-bullet-dot"></span>
+                        <span class="status-footer-text">Execution cycle complete. Awaiting next prompt.</span>
+                    </div>
+
+                </div>
+
+                <!-- Bottom Navigation -->
+                <nav class="bottom-nav" style="border-radius: 0 0 var(--radius-lg) var(--radius-lg);">
+                    <a href="index.html" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        <span>Hub</span>
+                    </a>
+                    <a href="meshes.html" class="nav-item active">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                        <span>Meshes</span>
+                    </a>
+                    <a href="agents.html" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <span>Agents</span>
+                    </a>
+                    <a href="settings.html" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        <span>Settings</span>
+                    </a>
+                </nav>
+            </main>
+        </div>
+
+    </div>
+
+    <!-- Mesh Monitor Modal -->
+    <div class="modal-backdrop" id="mesh-monitor-modal">
+        <div class="modal-card card" style="max-width: 820px; width: 95%;">
+            <button class="modal-close-btn" id="mesh-monitor-close-btn" aria-label="Close Monitor">&times;</button>
+            <div class="modal-header">
+                <div class="modal-avatar" id="monitor-avatar" style="background: var(--brand-copper); color: white; display: flex; align-items: center; justify-content: center;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;"><polygon points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                </div>
+                <div>
+                    <span class="badge" id="monitor-status-badge" style="background: var(--red-light); color: var(--red);">DEPLOYING MESH</span>
+                    <h3 style="margin-top: 4px;">Mesh Execution Monitor</h3>
+                    <div class="status-badge-container" style="margin-top: 4px;">
+                        <span class="pulse-dot" id="monitor-pulse-dot" style="background-color: var(--red); width: 6px; height: 6px;"></span>
+                        <span class="status-text" id="monitor-status-text">Booting network gateway container...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body" style="gap: 20px;">
+                <!-- Telemetry Stats Cards Grid -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+                    <!-- Stat 1 -->
+                    <div style="padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-main);">
+                        <span style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Deployment Progress</span>
+                        <div id="monitor-progress-val" style="font-size: 1.4rem; font-family: var(--font-heading); font-weight: 700; margin-top: 4px; color: var(--brand-copper);">0%</div>
+                    </div>
+                    <!-- Stat 2 -->
+                    <div style="padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-main);">
+                        <span style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Request Throughput</span>
+                        <div id="monitor-throughput-val" style="font-size: 1.4rem; font-family: var(--font-heading); font-weight: 700; margin-top: 4px; color: var(--text-primary);">0 req/s</div>
+                    </div>
+                    <!-- Stat 3 -->
+                    <div style="padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-main);">
+                        <span style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Error Rate</span>
+                        <div id="monitor-errors-val" style="font-size: 1.4rem; font-family: var(--font-heading); font-weight: 700; margin-top: 4px; color: var(--green);">0.0%</div>
+                    </div>
+                </div>
+
+                <!-- Big Live Chart -->
+                <div style="border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 16px; background: var(--bg-panel); height: 180px; position: relative; overflow: hidden;">
+                    <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.02em;">Live Traffic Throughput (10s window)</div>
+                    <svg viewBox="0 0 700 120" style="width: 100%; height: 130px; overflow: visible;">
+                        <defs>
+                            <linearGradient id="monitor-chart-grad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="var(--teal)" stop-opacity="0.3"/>
+                                <stop offset="100%" stop-color="var(--teal)" stop-opacity="0"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Grid Lines -->
+                        <line x1="0" y1="30" x2="700" y2="30" stroke="var(--border-color)" stroke-width="0.5" stroke-dasharray="4"/>
+                        <line x1="0" y1="60" x2="700" y2="60" stroke="var(--border-color)" stroke-width="0.5" stroke-dasharray="4"/>
+                        <line x1="0" y1="90" x2="700" y2="90" stroke="var(--border-color)" stroke-width="0.5" stroke-dasharray="4"/>
+                        <!-- Paths -->
+                        <path id="monitor-chart-fill" d="M0,120 L700,120 Z" fill="url(#monitor-chart-grad)" style="transition: d 0.2s ease;"/>
+                        <path id="monitor-chart-line" d="M0,120 L700,120" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition: d 0.2s ease;"/>
+                    </svg>
+                </div>
+
+                <!-- Terminal Console Log -->
+                <div style="background: #0f172a; color: #38bdf8; font-family: var(--font-mono); font-size: 0.72rem; padding: 12px; border-radius: var(--radius-sm); border: 1px solid #1e293b; height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;" id="monitor-console-log">
+                    <!-- Dynamic logs will be appended here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Settings Modal -->
+    <div class="modal-backdrop" id="profile-modal">
+        <div class="modal-card card">
+            <button class="modal-close-btn" id="profile-close-btn" aria-label="Close Profile">&times;</button>
+            <div class="modal-header">
+                <div class="modal-avatar" style="background: #ef4444; position: relative; overflow: hidden; cursor: pointer; flex-shrink: 0;" id="avatar-container" title="Click to change profile picture">
+                    <img id="profile-modal-img" src="" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; display: none; position: absolute; top: 0; left: 0;">
+                    <div id="profile-modal-placeholder" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.55); color: white; font-size: 0.55rem; text-align: center; padding: 3px 0; letter-spacing: 0.05em; font-weight: 700;">EDIT</div>
+                    <input type="file" id="profile-pic-input" accept="image/*" style="display: none;">
+                </div>
+                <div>
+                    <span class="badge" id="profile-modal-badge" style="background: #fef2f2; color: #ef4444;">ORCHESTRATOR</span>
+                    <h3 id="profile-modal-title">User Identity</h3>
+                    <div class="status-badge-container">
+                        <span class="indicator pulsing-green"></span>
+                        <span class="status-text">Profile Active</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div>
+                        <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Display Name</label>
+                        <input type="text" id="profile-name-input" value="Admin Barista" style="width: 100%; padding: 8px 12px; margin-top: 4px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.8rem; outline: none; background: var(--bg-panel); color: var(--text-primary);">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Role Persona</label>
+                        <select id="profile-role-select" style="width: 100%; max-width: 100%; padding: 8px 10px; margin-top: 4px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.8rem; outline: none; background: var(--bg-panel); color: var(--text-primary); text-overflow: ellipsis; box-sizing: border-box;">
+                            <option value="Lead Orchestrator">Lead Orchestrator</option>
+                            <option value="Product Architect">Product Architect</option>
+                            <option value="Code Synthesizer">Code Synthesizer</option>
+                            <option value="Stability Guard">Stability Guard</option>
+                            <option value="AI Engineer">AI Engineer</option>
+                            <option value="Prompt Engineer">Prompt Engineer</option>
+                            <option value="ML Engineer">ML Engineer</option>
+                            <option value="MLOps Engineer">MLOps Engineer</option>
+                            <option value="Generative AI Developer">Generative AI Developer</option>
+                            <option value="LLM Operations Engineer (LLMOps)">LLM Operations Engineer (LLMOps)</option>
+                            <option value="AI Agent &amp; Workflow Engineer">AI Agent &amp; Workflow Engineer</option>
+                            <option value="AI Research Engineer">AI Research Engineer</option>
+                            <option value="AI Infrastructure Engineer">AI Infrastructure Engineer</option>
+                            <option value="Vector DB &amp; RAG Architect">Vector DB &amp; RAG Architect</option>
+                            <option value="Software Engineer">Software Engineer</option>
+                            <option value="Student">Student</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Session Scope</label>
+                        <p style="margin-top: 4px; font-size: 0.8rem; font-family: var(--font-mono); color: var(--text-secondary);">barista-solution-mesh-alpha</p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 16px;">
+                    <button class="btn btn-primary" id="save-profile-btn" style="background: #ef4444; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.15); flex: 1; margin: 0;">Save Profile</button>
+                    <button class="btn btn-secondary" id="logout-btn" style="flex: 1; margin: 0;">Log Out</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating AI Assistant Chat Widget -->
+    <div class="ai-chat-widget" id="ai-chat-widget">
+        <button class="chat-toggle-btn" id="chat-toggle-btn" aria-label="Toggle AI Assistant">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chat-icon-open" style="width: 24px; height: 24px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chat-icon-close" style="width: 24px; height: 24px; display: none;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <span class="chat-pulse-dot"></span>
+        </button>
+
+        <div class="chat-window card" id="chat-window">
+            <div class="chat-header">
+                <div class="chat-header-avatar">
+                    <svg viewBox="0 0 512 512" fill="none" style="width: 16px; height: 16px;"><path d="M192 140C165 200 160 280 230 330C280 365 340 330 340 330C340 330 300 300 270 290C240 280 220 250 240 210C260 170 300 160 310 140C290 150 260 180 250 210C240 230 215 250 195 240C175 230 175 180 192 140Z" fill="#ffffff"/></svg>
+                </div>
+                <div class="chat-header-info">
+                    <h4>Gemma 4 AI Assistant</h4>
+                    <div class="status-badge-container" style="margin-top: 0;">
+                        <span class="indicator pulsing-green" style="background-color: #a3e635; box-shadow: 0 0 0 0 rgba(163, 230, 53, 0.4);"></span>
+                        <span class="status-text" style="font-size: 0.65rem; color: #bef264;">Active</span>
+                    </div>
+                </div>
+                <button class="chat-minimize-btn" id="chat-minimize-btn" aria-label="Minimize Chat">&times;</button>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="chat-msg bot-msg">
+                    <p>Hello! I am the <strong>Gemma 4 AI Assistant</strong>, integrated directly into your orchestration dashboard.</p>
+                    <p>Ask me anything about the barista app, coffee recipes, running tests, or active mesh operations!</p>
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chat-input" placeholder="Type your question..." aria-label="AI message input">
+                <button id="chat-send-btn" aria-label="Send message">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

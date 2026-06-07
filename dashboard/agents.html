@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        // Session Guard
+        if (!localStorage.getItem("minnu_session")) {
+            window.location.href = "login.html";
+        }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minnu AI - Agent Directory</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="style.css?v=1.1">
+    
+    <style>
+        .single-panel-layout {
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            transition: max-width 0.3s ease;
+        }
+        
+        @media (min-width: 900px) {
+            .single-panel-layout {
+                max-width: 1000px;
+            }
+            .agents-grid {
+                display: grid !important;
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+                gap: 20px !important;
+            }
+            .agent-card {
+                margin-bottom: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        
+        <div class="single-panel-layout">
+            <!-- Header Section -->
+            <header class="panel-header flex-column-start" style="border-radius: var(--radius-lg) var(--radius-lg) 0 0; border: 1px solid var(--border-color); border-bottom: none;">
+                <div class="brand-header-row">
+                    <div class="brand-logo-container">
+                        <!-- Phoenix SVG Symbol -->
+                        <svg class="brand-logo-svg" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M192 140C165 200 160 280 230 330C280 365 340 330 340 330C340 330 300 300 270 290C240 280 220 250 240 210C260 170 300 160 310 140C290 150 260 180 250 210C240 230 215 250 195 240C175 230 175 180 192 140Z" fill="#af5d33"/>
+                            <path d="M340 330C340 330 380 270 410 270C440 270 450 300 425 350C400 400 370 400 370 400" stroke="#af5d33" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M420 180C400 185 365 200 350 240C335 280 300 370 270 390C240 410 210 390 235 345C255 310 290 235 330 210" stroke="#213a57" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M398 185C408 170 428 172 428 172" stroke="#213a57" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M330 210C315 190 270 160 220 160" stroke="#213a57" stroke-width="24" stroke-linecap="round"/>
+                            <path d="M310 240C290 220 250 195 200 200" stroke="#213a57" stroke-width="24" stroke-linecap="round"/>
+                            <path d="M290 270C275 250 240 230 195 240" stroke="#213a57" stroke-width="24" stroke-linecap="round"/>
+                        </svg>
+                        <span class="brand-logo-text"><span class="text-minnu">Minnu</span> <span class="text-ai">AI</span></span>
+                    </div>
+                    <button class="profile-btn-red" aria-label="Profile Settings">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="active-user-badge" id="active-user-display" style="display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: var(--text-secondary); margin-top: -6px; font-weight: 500; user-select: none;">
+                    <span class="pulse-dot" style="width: 6px; height: 6px; background-color: var(--brand-copper); animation: dotPulse 2s infinite;"></span>
+                    Active Session: <strong id="active-user-name" style="color: var(--text-primary);">Admin Barista</strong> (<span id="active-user-role">Lead Orchestrator</span>)
+                </div>
+            </header>
+
+            <!-- Main Panel Content -->
+            <main class="panel right-panel active-panel" style="flex: 1; border-top: none; border-radius: 0 0 var(--radius-lg) var(--radius-lg); width: 100%;">
+                <div class="panel-content">
+                    <div class="execution-title">
+                        <h2>Agent Directory</h2>
+                        <p class="subtitle">Discover and deploy specialized AI agents tailored for your enterprise workflows. Verified performance and seamlessly integrated.</p>
+                    </div>
+
+                    <!-- Search box -->
+                    <div class="search-container">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="text" id="agent-search-input" placeholder="Search agents by role, skill, or name...">
+                    </div>
+
+                    <!-- Roles filters -->
+                    <div class="filters-container">
+                        <button class="filter-tab active" data-role="all">All Roles</button>
+                        <button class="filter-tab" data-role="engineering">Engineering</button>
+                        <button class="filter-tab" data-role="product">Product</button>
+                        <button class="filter-tab" data-role="qa">QA</button>
+                    </div>
+
+                    <!-- Agents List Grid -->
+                    <div class="agents-grid" id="agents-list">
+                        
+                        <!-- Agent Card 1 -->
+                        <div class="card agent-card" data-category="engineering" data-tags="aws kubernetes system-design">
+                            <button class="bookmark-btn" aria-label="Bookmark Agent">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                                </svg>
+                            </button>
+                            <div class="agent-profile">
+                                <div class="agent-avatar-gradient grad-1">
+                                    <span>AA</span>
+                                </div>
+                                <div class="agent-intro">
+                                    <span class="badge badge-architect">ARCHITECT</span>
+                                    <h3>Arch-Bot Alpha</h3>
+                                    <div class="agent-rating">
+                                        <svg viewBox="0 0 24 24" fill="currentColor" class="star-icon"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                        <span class="rating-val">99.2%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="agent-desc">Specializes in designing scalable microservices architectures and optimizing cloud infrastructure.</p>
+                            <div class="agent-tags">
+                                <span class="tag">AWS</span>
+                                <span class="tag">Kubernetes</span>
+                                <span class="tag">System Design</span>
+                            </div>
+                            <button class="btn btn-secondary view-profile-btn" data-agent="arch-bot">View Profile</button>
+                        </div>
+
+                        <!-- Agent Card 2 -->
+                        <div class="card agent-card" data-category="product" data-tags="jira agile roadmaps">
+                            <button class="bookmark-btn" aria-label="Bookmark Agent">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                                </svg>
+                            </button>
+                            <div class="agent-profile">
+                                <div class="agent-avatar-gradient grad-2">
+                                    <span>PN</span>
+                                </div>
+                                <div class="agent-intro">
+                                    <span class="badge badge-product">PRODUCT</span>
+                                    <h3>PM-Bot Nexus</h3>
+                                    <div class="agent-rating">
+                                        <svg viewBox="0 0 24 24" fill="currentColor" class="star-icon"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                        <span class="rating-val">98.5%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="agent-desc">Drives product strategy, manages agile sprints, and translates business requirements into product specifications.</p>
+                            <div class="agent-tags">
+                                <span class="tag">Jira</span>
+                                <span class="tag">Agile</span>
+                                <span class="tag">Roadmaps</span>
+                            </div>
+                            <button class="btn btn-secondary view-profile-btn" data-agent="pm-bot">View Profile</button>
+                        </div>
+
+                        <!-- Agent Card 3 -->
+                        <div class="card agent-card" data-category="engineering" data-tags="python fastapi databases algorithm">
+                            <button class="bookmark-btn" aria-label="Bookmark Agent">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                                </svg>
+                            </button>
+                            <div class="agent-profile">
+                                <div class="agent-avatar-gradient grad-3">
+                                    <span>CS</span>
+                                </div>
+                                <div class="agent-intro">
+                                    <span class="badge badge-developer">DEVELOPER</span>
+                                    <h3>Code-Bot Sigma</h3>
+                                    <div class="agent-rating">
+                                        <svg viewBox="0 0 24 24" fill="currentColor" class="star-icon"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                        <span class="rating-val">97.9%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="agent-desc">Expert Python developer specializing in high-performance backends, API creation, and algorithm design.</p>
+                            <div class="agent-tags">
+                                <span class="tag">Python</span>
+                                <span class="tag">FastAPI</span>
+                                <span class="tag">Databases</span>
+                            </div>
+                            <button class="btn btn-secondary view-profile-btn" data-agent="code-bot">View Profile</button>
+                        </div>
+
+                        <!-- Agent Card 4 -->
+                        <div class="card agent-card" data-category="qa" data-tags="pytest selenium security performance">
+                            <button class="bookmark-btn" aria-label="Bookmark Agent">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                                </svg>
+                            </button>
+                            <div class="agent-profile">
+                                <div class="agent-avatar-gradient grad-4">
+                                    <span>GD</span>
+                                </div>
+                                <div class="agent-intro">
+                                    <span class="badge badge-qa">QA SYSTEM</span>
+                                    <h3>Guard-Bot Delta</h3>
+                                    <div class="agent-rating">
+                                        <svg viewBox="0 0 24 24" fill="currentColor" class="star-icon"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                        <span class="rating-val">99.1%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="agent-desc">Quality control bot executing parallel integration suites, fuzzing API limits, and validating system security guidelines.</p>
+                            <div class="agent-tags">
+                                <span class="tag">Pytest</span>
+                                <span class="tag">Selenium</span>
+                                <span class="tag">Fuzzing</span>
+                            </div>
+                            <button class="btn btn-secondary view-profile-btn" data-agent="guard-bot">View Profile</button>
+                        </div>
+
+                    </div>
+                </div>
+                
+                <!-- Bottom Navigation -->
+                <nav class="bottom-nav" style="border-radius: 0 0 var(--radius-lg) var(--radius-lg);">
+                    <a href="index.html" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        <span>Hub</span>
+                    </a>
+                    <a href="meshes.html" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                        <span>Meshes</span>
+                    </a>
+                    <a href="agents.html" class="nav-item active">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <span>Agents</span>
+                    </a>
+                    <a href="settings.html" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        <span>Settings</span>
+                    </a>
+                </nav>
+            </main>
+        </div>
+
+    </div>
+
+    <!-- Agent Detail Modal -->
+    <div class="modal-backdrop" id="agent-modal">
+        <div class="modal-card card">
+            <button class="modal-close-btn" id="modal-close-btn">&times;</button>
+            <div class="modal-header">
+                <div class="modal-avatar" id="modal-avatar"></div>
+                <div>
+                    <span class="badge" id="modal-badge">ARCHITECT</span>
+                    <h3 id="modal-name">Arch-Bot Alpha</h3>
+                    <div class="agent-rating">
+                        <svg viewBox="0 0 24 24" fill="currentColor" class="star-icon"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <span class="rating-val" id="modal-rating">99.2%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <h4>Description</h4>
+                <p id="modal-description">Detailed description will load here.</p>
+                
+                <h4>Key Capabilities</h4>
+                <ul class="modal-capabilities" id="modal-capabilities">
+                    <li>Capability 1</li>
+                    <li>Capability 2</li>
+                </ul>
+
+                <h4>Agent Workload Telemetry</h4>
+                <div style="margin: 4px 0 10px 0; display: flex; flex-direction: column; gap: 6px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 4px; font-size: 0.76rem;">
+                        <span style="color: var(--text-secondary); font-weight: 500;">Active Queue Tasks:</span>
+                        <span id="modal-agent-tasks" style="font-family: var(--font-mono); font-weight: 600; color: var(--brand-copper);">2 running</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.76rem;">
+                        <span style="color: var(--text-secondary); font-weight: 500;">Response Speed Average:</span>
+                        <span id="modal-agent-speed" style="font-family: var(--font-mono); font-weight: 600; color: var(--teal);">120ms</span>
+                    </div>
+                </div>
+                <div class="agent-chart-container" style="height: 70px; margin: 4px 0 10px 0; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-main); padding: 6px; overflow: hidden; position: relative;">
+                    <svg viewBox="0 0 300 60" style="width: 100%; height: 100%; overflow: visible;" id="modal-agent-chart">
+                        <defs>
+                            <linearGradient id="agent-chart-grad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="var(--brand-copper)" stop-opacity="0.25"/>
+                                <stop offset="100%" stop-color="var(--brand-copper)" stop-opacity="0"/>
+                            </linearGradient>
+                        </defs>
+                        <path id="agent-chart-fill" d="M0,60 L300,60 Z" fill="url(#agent-chart-grad)" style="transition: d 0.2s ease;"/>
+                        <path id="agent-chart-line" d="M0,60 L300,60" fill="none" stroke="var(--brand-copper)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transition: d 0.2s ease;"/>
+                    </svg>
+                </div>
+
+                <h4>Deploy in Workspaces</h4>
+                <div class="modal-deploy-section">
+                    <p>Trigger execution mesh for this specialist agent in current environment:</p>
+                    <button class="btn btn-primary" id="modal-deploy-btn">Deploy Agent</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Settings Modal -->
+    <div class="modal-backdrop" id="profile-modal">
+        <div class="modal-card card">
+            <button class="modal-close-btn" id="profile-close-btn" aria-label="Close Profile">&times;</button>
+            <div class="modal-header">
+                <div class="modal-avatar" style="background: #ef4444; position: relative; overflow: hidden; cursor: pointer; flex-shrink: 0;" id="avatar-container" title="Click to change profile picture">
+                    <img id="profile-modal-img" src="" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; display: none; position: absolute; top: 0; left: 0;">
+                    <div id="profile-modal-placeholder" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.55); color: white; font-size: 0.55rem; text-align: center; padding: 3px 0; letter-spacing: 0.05em; font-weight: 700;">EDIT</div>
+                    <input type="file" id="profile-pic-input" accept="image/*" style="display: none;">
+                </div>
+                <div>
+                    <span class="badge" id="profile-modal-badge" style="background: #fef2f2; color: #ef4444;">ORCHESTRATOR</span>
+                    <h3 id="profile-modal-title">User Identity</h3>
+                    <div class="status-badge-container">
+                        <span class="indicator pulsing-green"></span>
+                        <span class="status-text">Profile Active</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div>
+                        <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Display Name</label>
+                        <input type="text" id="profile-name-input" value="Admin Barista" style="width: 100%; padding: 8px 12px; margin-top: 4px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.8rem; outline: none; background: var(--bg-panel); color: var(--text-primary);">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Role Persona</label>
+                        <select id="profile-role-select" style="width: 100%; max-width: 100%; padding: 8px 10px; margin-top: 4px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.8rem; outline: none; background: var(--bg-panel); color: var(--text-primary); text-overflow: ellipsis; box-sizing: border-box;">
+                            <option value="Lead Orchestrator">Lead Orchestrator</option>
+                            <option value="Product Architect">Product Architect</option>
+                            <option value="Code Synthesizer">Code Synthesizer</option>
+                            <option value="Stability Guard">Stability Guard</option>
+                            <option value="AI Engineer">AI Engineer</option>
+                            <option value="Prompt Engineer">Prompt Engineer</option>
+                            <option value="ML Engineer">ML Engineer</option>
+                            <option value="MLOps Engineer">MLOps Engineer</option>
+                            <option value="Generative AI Developer">Generative AI Developer</option>
+                            <option value="LLM Operations Engineer (LLMOps)">LLM Operations Engineer (LLMOps)</option>
+                            <option value="AI Agent &amp; Workflow Engineer">AI Agent &amp; Workflow Engineer</option>
+                            <option value="AI Research Engineer">AI Research Engineer</option>
+                            <option value="AI Infrastructure Engineer">AI Infrastructure Engineer</option>
+                            <option value="Vector DB &amp; RAG Architect">Vector DB &amp; RAG Architect</option>
+                            <option value="Software Engineer">Software Engineer</option>
+                            <option value="Student">Student</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Session Scope</label>
+                        <p style="margin-top: 4px; font-size: 0.8rem; font-family: var(--font-mono); color: var(--text-secondary);">barista-solution-mesh-alpha</p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 16px;">
+                    <button class="btn btn-primary" id="save-profile-btn" style="background: #ef4444; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.15); flex: 1; margin: 0;">Save Profile</button>
+                    <button class="btn btn-secondary" id="logout-btn" style="flex: 1; margin: 0;">Log Out</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating AI Assistant Chat Widget -->
+    <div class="ai-chat-widget" id="ai-chat-widget">
+        <button class="chat-toggle-btn" id="chat-toggle-btn" aria-label="Toggle AI Assistant">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chat-icon-open" style="width: 24px; height: 24px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chat-icon-close" style="width: 24px; height: 24px; display: none;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <span class="chat-pulse-dot"></span>
+        </button>
+
+        <div class="chat-window card" id="chat-window">
+            <div class="chat-header">
+                <div class="chat-header-avatar">
+                    <svg viewBox="0 0 512 512" fill="none" style="width: 16px; height: 16px;"><path d="M192 140C165 200 160 280 230 330C280 365 340 330 340 330C340 330 300 300 270 290C240 280 220 250 240 210C260 170 300 160 310 140C290 150 260 180 250 210C240 230 215 250 195 240C175 230 175 180 192 140Z" fill="#ffffff"/></svg>
+                </div>
+                <div class="chat-header-info">
+                    <h4>Gemma 4 AI Assistant</h4>
+                    <div class="status-badge-container" style="margin-top: 0;">
+                        <span class="indicator pulsing-green" style="background-color: #a3e635; box-shadow: 0 0 0 0 rgba(163, 230, 53, 0.4);"></span>
+                        <span class="status-text" style="font-size: 0.65rem; color: #bef264;">Active</span>
+                    </div>
+                </div>
+                <button class="chat-minimize-btn" id="chat-minimize-btn" aria-label="Minimize Chat">&times;</button>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="chat-msg bot-msg">
+                    <p>Hello! I am the <strong>Gemma 4 AI Assistant</strong>, integrated directly into your orchestration dashboard.</p>
+                    <p>Ask me anything about the barista app, coffee recipes, running tests, or active mesh operations!</p>
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chat-input" placeholder="Type your question..." aria-label="AI message input">
+                <button id="chat-send-btn" aria-label="Send message">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

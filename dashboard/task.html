@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        // Session Guard
+        if (!localStorage.getItem("minnu_session")) {
+            window.location.href = "login.html";
+        }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minnu AI - Task Details</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --brand-navy: #213a57;
+            --brand-copper: #af5d33;
+            --teal: #009688;
+            --teal-light: #e0f2f1;
+            --teal-dark: #004d40;
+            --red: #ef4444;
+            --red-light: #fef2f2;
+            --green: #10b981;
+            --green-light: #ecfdf5;
+            --blue: #3b82f6;
+            --blue-light: #eff6ff;
+            --font-sans: 'Inter', sans-serif;
+            --font-heading: 'Outfit', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 24px;
+        }
+
+        /* Animated background mesh */
+        .bg-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            background: radial-gradient(circle at 15% 15%, rgba(33, 58, 87, 0.6) 0%, transparent 40%),
+                        radial-gradient(circle at 85% 85%, rgba(175, 93, 51, 0.4) 0%, transparent 50%),
+                        radial-gradient(circle at 50% 50%, rgba(0, 150, 136, 0.2) 0%, transparent 60%);
+            filter: blur(80px);
+            animation: bgDrift 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes bgDrift {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.1) translate(1%, 1%); }
+        }
+
+        .details-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .brand-logo-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+            text-decoration: none;
+        }
+
+        .brand-logo-svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .brand-logo-text {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .text-minnu {
+            color: #ffffff;
+        }
+
+        .text-ai {
+            color: var(--brand-copper);
+        }
+
+        .btn-back {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-sm);
+            padding: 8px 16px;
+            font-family: var(--font-heading);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateX(-2px);
+        }
+
+        /* Header Card */
+        .header-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: 24px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header-title-section h1 {
+            font-family: var(--font-heading);
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 6px;
+        }
+
+        .header-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-transform: uppercase;
+        }
+
+        .badge-active {
+            background: var(--green-light);
+            color: var(--green);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .badge-completed {
+            background: var(--blue-light);
+            color: var(--blue);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .region-tag {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Dashboard Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 24px;
+            width: 100%;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Left Panel Cards */
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .card-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border-glass);
+            padding-bottom: 8px;
+        }
+
+        .task-desc {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .metrics-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed var(--border-glass);
+            padding-bottom: 8px;
+        }
+
+        .metric-row:last-child {
+            border: none;
+            padding: 0;
+        }
+
+        .metric-label {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .metric-value {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Right Panel Cards */
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Chart card */
+        .chart-card {
+            height: 280px;
+        }
+
+        .chart-container {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: 180px;
+            margin-top: 10px;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            overflow: hidden;
+        }
+
+        /* Terminal card */
+        .terminal-card {
+            flex: 1;
+            min-height: 280px;
+        }
+
+        .terminal-console {
+            flex: 1;
+            background: #090d16;
+            color: #38bdf8;
+            font-family: var(--font-mono);
+            font-size: 0.76rem;
+            padding: 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            height: 220px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            scrollbar-width: thin;
+        }
+
+        .terminal-console::-webkit-scrollbar {
+            width: 5px;
+        }
+        .terminal-console::-webkit-scrollbar-thumb {
+            background-color: var(--border-glass);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-gradient"></div>
+
+    <div class="details-wrapper">
+        <!-- Top Navigation -->
+        <div class="top-bar">
+            <a href="index.html" class="brand-logo-section">
+                <!-- Phoenix SVG Symbol -->
+                <svg class="brand-logo-svg" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M192 140C165 200 160 280 230 330C280 365 340 330 340 330C340 330 300 300 270 290C240 280 220 250 240 210C260 170 300 160 310 140C290 150 260 180 250 210C240 230 215 250 195 240C175 230 175 180 192 140Z" fill="#af5d33"/>
+                    <path d="M340 330C340 330 380 270 410 270C440 270 450 300 425 350C400 400 370 400 370 400" stroke="#af5d33" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M420 180C400 185 365 200 350 240C335 280 300 370 270 390C240 410 210 390 235 345C255 310 290 235 330 210" stroke="#213a57" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M398 185C408 170 428 172 428 172" stroke="#213a57" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M330 210C315 190 270 160 220 160" stroke="#213a57" stroke-width="24" stroke-linecap="round"/>
+                    <path d="M310 240C290 220 250 195 200 200" stroke="#213a57" stroke-width="24" stroke-linecap="round"/>
+                    <path d="M290 270C275 250 240 230 195 240" stroke="#213a57" stroke-width="24" stroke-linecap="round"/>
+                </svg>
+                <span class="brand-logo-text"><span class="text-minnu">Minnu</span> <span class="text-ai">AI</span></span>
+            </a>
+            <button class="btn-back" onclick="window.location.href='index.html'">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                Back to Dashboard
+            </button>
+        </div>
+
+        <!-- Task Title Header Card -->
+        <div class="header-card">
+            <div class="header-title-section">
+                <span class="region-tag" id="task-region">Region: Global</span>
+                <h1 id="task-title">Task Details Portal</h1>
+                <div class="header-meta">
+                    <span class="badge" id="task-status">Active</span>
+                    <span style="font-size: 0.78rem; color: var(--text-secondary); font-family: var(--font-mono);" id="task-uuid">ID: task_mesh_default</span>
+                </div>
+            </div>
+            <div style="font-size: 0.72rem; color: var(--text-secondary); text-align: right; font-family: var(--font-mono); line-height: 1.4;">
+                <div>Session Scope: <strong style="color: var(--text-primary);">barista-solution-mesh-alpha</strong></div>
+                <div>Server Node: <strong style="color: var(--teal);">active-node-backend</strong></div>
+            </div>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            
+            <!-- Left Column -->
+            <div class="left-column">
+                <!-- Description Card -->
+                <div class="glass-card">
+                    <div class="card-title">Scope & Context</div>
+                    <p class="task-desc" id="task-description">Loading details about this orchestration task and its execution specifications...</p>
+                </div>
+
+                <!-- Telemetry Stats Card -->
+                <div class="glass-card">
+                    <div class="card-title">Telemetry Metrics</div>
+                    <div class="metrics-list" id="task-metrics">
+                        <!-- Filled dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="right-column">
+                <!-- Telemetry Chart -->
+                <div class="glass-card chart-card">
+                    <div class="card-title" id="chart-title">Real-Time Performance telemetry</div>
+                    <div class="chart-container">
+                        <svg viewBox="0 0 700 130" style="width: 100%; height: 100%; overflow: visible;" id="telemetry-svg-chart">
+                            <defs>
+                                <linearGradient id="chart-grad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="var(--teal)" stop-opacity="0.3"/>
+                                    <stop offset="100%" stop-color="var(--teal)" stop-opacity="0"/>
+                                </linearGradient>
+                            </defs>
+                            <!-- Grid Lines -->
+                            <line x1="0" y1="30" x2="700" y2="30" stroke="var(--border-glass)" stroke-width="0.5" stroke-dasharray="4"/>
+                            <line x1="0" y1="65" x2="700" y2="65" stroke="var(--border-glass)" stroke-width="0.5" stroke-dasharray="4"/>
+                            <line x1="0" y1="100" x2="700" y2="100" stroke="var(--border-glass)" stroke-width="0.5" stroke-dasharray="4"/>
+                            <!-- Dynamic Paths -->
+                            <path id="chart-fill" d="M0,130 L700,130 Z" fill="url(#chart-grad)" style="transition: d 0.2s ease;"/>
+                            <path id="chart-line" d="M0,130 L700,130" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition: d 0.2s ease;"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Terminal Console -->
+                <div class="glass-card terminal-card">
+                    <div class="card-title">Console Terminal Output</div>
+                    <div class="terminal-console" id="console-logs">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Configuration mappings for tasks
+        const tasksData = {
+            "auth": {
+                title: "Build Auth Service",
+                region: "Region: US-East",
+                status: "active",
+                statusClass: "badge-active",
+                description: "This task deploys OAuth2 / JWT authentication, rate limiting controllers, and secure verification filters. It ensures client credentials and tokens are certified against the database.",
+                metrics: [
+                    { label: "Auth Success Rate", key: "success_rate", unit: "%", value: 99.8, drift: 0.1, max: 100, min: 99.5 },
+                    { label: "Token Generation Delay", key: "token_delay", unit: " ms", value: 2.4, drift: 0.3, max: 5.0, min: 1.5 },
+                    { label: "Active Sessions", key: "sessions", unit: "", value: 1240, drift: 5, max: 1300, min: 1200 }
+                ],
+                chartLabel: "Auth Request Rate (Requests/sec)",
+                chartColor: "var(--teal)",
+                logTemplate: [
+                    "[GATEWAY] Incoming authentication request from client node US-East-1",
+                    "[SECURITY] Validating client credentials against users.db...",
+                    "[SECURITY] Password SHA-256 match verified.",
+                    "[AUTH] Issuing session JWT Token, expires in 3600 seconds",
+                    "[GATEWAY] Handshake complete. Status code: 200 OK",
+                    "[RATE-LIMITER] Request pipeline load: 12.4% capacity"
+                ]
+            },
+            "db": {
+                title: "Optimize DB Queries",
+                region: "Region: EU-West",
+                status: "active",
+                statusClass: "badge-active",
+                description: "Handles database indexing, slow query analysis, and distributed cache configurations. It optimizes read/write throughput speeds and stabilizes latency bounds.",
+                metrics: [
+                    { label: "Cache Hit Ratio", key: "cache_hit", unit: "%", value: 94.2, drift: 0.4, max: 98, min: 92 },
+                    { label: "Avg Query Latency", key: "latency", unit: " ms", value: 12, drift: 2, max: 25, min: 8 },
+                    { label: "Query Throughput", key: "throughput", unit: " qps", value: 850, drift: 15, max: 950, min: 750 }
+                ],
+                chartLabel: "Query Execution Speed (ms)",
+                chartColor: "var(--blue)",
+                logTemplate: [
+                    "[DATABASE] Scanning read latency for SELECT * FROM users queries",
+                    "[OPTIMIZER] Found index match on user table fields (username)",
+                    "[CACHE] Hydrating Redis memory cache key: user_profile_admin",
+                    "[DATABASE] Finished optimization sweep. Executed in 12.4ms",
+                    "[SCHEDULER] Triggering daily SQLite vacuum optimization..."
+                ]
+            },
+            "ingress": {
+                title: "Ingress Routing Mesh",
+                region: "Region: Global",
+                status: "active",
+                statusClass: "badge-active",
+                description: "Deploys edge load balancing nodes, SSL/TLS certificate termination pipelines, and geo-aware IP traffic distribution algorithms across regional gateways.",
+                metrics: [
+                    { label: "Mesh Bandwidth", key: "bandwidth", unit: " MB/s", value: 142, drift: 3, max: 160, min: 130 },
+                    { label: "Request Error Rate", key: "errors", unit: "%", value: 0.02, drift: 0.01, max: 0.1, min: 0.0 },
+                    { label: "Ingress Nodes Active", key: "nodes", unit: " online", value: 18, drift: 0, max: 18, min: 18 }
+                ],
+                chartLabel: "Mesh Bandwidth Usage (MB/s)",
+                chartColor: "var(--teal)",
+                logTemplate: [
+                    "[ROUTER] Route table updated. 18 edge locations registered",
+                    "[GATEWAY] Distributing geo-traffic for node EU-West to Frankfurt router",
+                    "[SECURITY] TLS v1.3 handshake negotiation completed with client",
+                    "[ROUTER] Ingress load balancer reports 99.98% health index"
+                ]
+            },
+            "lambda": {
+                title: "Lambda Hot-Start Tuning",
+                region: "Region: US-West",
+                status: "completed",
+                statusClass: "badge-completed",
+                description: "Configures memory footprint allocations, code optimization boundaries, and provisioned concurrency capacities to eliminate serverless runtime boot cold starts.",
+                metrics: [
+                    { label: "Avg Cold Start Lag", key: "cold_start", unit: " ms", value: 5, drift: 0, max: 5, min: 5 },
+                    { label: "Provisioned Capacity", key: "capacity", unit: " instances", value: 150, drift: 0, max: 150, min: 150 },
+                    { label: "Optimization Efficiency", key: "efficiency", unit: "%", value: 93.7, drift: 0, max: 93.7, min: 93.7 }
+                ],
+                chartLabel: "Warm Start Duration (ms)",
+                chartColor: "var(--brand-copper)",
+                logTemplate: [
+                    "[LAMBDA] Initializing provisioned concurrency memory profiles...",
+                    "[PROFILER] Preloading virtual runtime container environments",
+                    "[OPTIMIZER] Hot start verified. Invocation duration: 4.8ms",
+                    "[SYSTEM] Concurrency check: 150 instances warm. Complete!"
+                ]
+            },
+            "migration": {
+                title: "Schema Migration v2.1",
+                region: "Region: AP-South",
+                status: "completed",
+                statusClass: "badge-completed",
+                description: "Handles structured migrations of relational databases, non-blocking schema extensions, columns updates, and data validation passes.",
+                metrics: [
+                    { label: "Migrated Records", key: "records", unit: " M", value: 4.8, drift: 0, max: 4.8, min: 4.8 },
+                    { label: "Validation Accuracy", key: "accuracy", unit: "%", value: 100.0, drift: 0, max: 100, min: 100 },
+                    { label: "Migration Time", key: "duration", unit: " sec", value: 42, drift: 0, max: 42, min: 42 }
+                ],
+                chartLabel: "Migration Validation Coverage (%)",
+                chartColor: "var(--blue)",
+                logTemplate: [
+                    "[MIGRATION] Acquiring schema transaction write lock...",
+                    "[DATABASE] Executing: ALTER TABLE users ADD COLUMN last_login TIMESTAMP",
+                    "[MIGRATION] Indexing column: last_login on users table",
+                    "[MIGRATION] Validating 4,800,000 records. Accuracy: 100%",
+                    "[SYSTEM] Releasing table transaction lock. Migration complete!"
+                ]
+            },
+            "audit": {
+                title: "Security Audit Automation",
+                region: "Region: Global",
+                status: "completed",
+                statusClass: "badge-completed",
+                description: "Scans active modules for potential vulnerabilities, monitors dependency locks, audits database permission schemas, and rotates secure access tokens.",
+                metrics: [
+                    { label: "Vulnerabilities Found", key: "vulnerabilities", unit: "", value: 0, drift: 0, max: 0, min: 0 },
+                    { label: "Token Age", key: "token_age", unit: " days", value: 12, drift: 0, max: 12, min: 12 },
+                    { label: "SOC2 Compliance", key: "compliance", unit: " Rating", value: 100, drift: 0, max: 100, min: 100 }
+                ],
+                chartLabel: "SOC2 Policy Audits Success Rate (%)",
+                chartColor: "var(--teal)",
+                logTemplate: [
+                    "[AUDIT] Initializing automated security scan daemon...",
+                    "[SCANNER] Auditing dependency hashes against vulnerability DBs",
+                    "[SECURITY] Credential rotation check: All keys rotated within 14-day limit",
+                    "[AUDIT] SOC2 Policy verification checklist: 42/42 passed.",
+                    "[SYSTEM] Audit complete. Compliance status: SECURE."
+                ]
+            }
+        };
+
+        // Extract task param from URL
+        const params = new URLSearchParams(window.location.search);
+        const taskId = params.get("task") || "auth";
+        const task = tasksData[taskId] || tasksData["auth"];
+
+        // Fill HTML Text details
+        document.getElementById("task-title").textContent = task.title;
+        document.getElementById("task-region").textContent = task.region;
+        document.getElementById("task-description").textContent = task.description;
+        
+        const statusBadge = document.getElementById("task-status");
+        statusBadge.textContent = task.status;
+        statusBadge.className = `badge ${task.statusClass}`;
+        
+        document.getElementById("task-uuid").textContent = `ID: task_mesh_${taskId}`;
+        document.getElementById("chart-title").textContent = task.chartLabel;
+
+        // Custom chart color
+        const chartLine = document.getElementById("chart-line");
+        const chartFill = document.getElementById("chart-fill");
+        const chartGradStop = document.querySelector("#chart-grad stop");
+        if (chartLine) chartLine.setAttribute("stroke", task.chartColor);
+        if (chartGradStop) chartGradStop.setAttribute("stop-color", task.chartColor);
+
+        // Load metrics list
+        const metricsContainer = document.getElementById("task-metrics");
+        const metricsMap = {};
+        task.metrics.forEach(m => {
+            const div = document.createElement("div");
+            div.className = "metric-row";
+            div.innerHTML = `
+                <span class="metric-label">${m.label}</span>
+                <span class="metric-value" id="val-${m.key}">${m.value}${m.unit}</span>
+            `;
+            metricsContainer.appendChild(div);
+            // Track state locally for fluctuation
+            metricsMap[m.key] = m;
+        });
+
+        // Initialize chart history
+        let chartHistory = Array(15).fill(0).map(() => {
+            const primaryMetric = task.metrics[0];
+            return primaryMetric.value + (Math.random() * primaryMetric.drift * 4 - primaryMetric.drift * 2);
+        });
+
+        function drawChart() {
+            const maxVal = Math.max(...chartHistory) || 1;
+            const minVal = Math.min(...chartHistory) || 0;
+            const range = maxVal - minVal || 1;
+
+            const points = chartHistory.map((val, idx) => {
+                const x = idx * (700 / (chartHistory.length - 1));
+                const y = 110 - ((val - minVal) / range) * 85; // fit to viewbox
+                return { x, y };
+            });
+
+            const lineD = `M ${points.map((p, i) => (i === 0 ? "" : "L ") + `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")}`;
+            const fillD = `${lineD} L 700,130 L 0,130 Z`;
+
+            if (chartLine) chartLine.setAttribute("d", lineD);
+            if (chartFill) chartFill.setAttribute("d", fillD);
+        }
+
+        // Initial draw
+        drawChart();
+
+        // Terminal Log Appender
+        const consoleLogs = document.getElementById("console-logs");
+        let logCounter = 0;
+
+        function addLogLine(text) {
+            const now = new Date();
+            const timeStr = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`;
+            const div = document.createElement("div");
+            div.innerHTML = `<span style="color: #64748b;">[${timeStr}]</span> ${text}`;
+            consoleLogs.appendChild(div);
+            consoleLogs.scrollTop = consoleLogs.scrollHeight;
+            
+            // Limit terminal size
+            if (consoleLogs.children.length > 25) {
+                consoleLogs.removeChild(consoleLogs.firstChild);
+            }
+        }
+
+        // Hydrate initial log lines
+        task.logTemplate.forEach(line => {
+            setTimeout(() => addLogLine(line), logCounter++ * 300);
+        });
+
+        // Fluctuation update Loop (only run dynamic drift if active)
+        setInterval(() => {
+            if (task.status === "active") {
+                // 1. Drift stats
+                task.metrics.forEach(m => {
+                    const driftVal = (Math.random() * m.drift * 2) - m.drift;
+                    m.value = Math.max(m.min, Math.min(m.max, m.value + driftVal));
+                    const valEl = document.getElementById(`val-${m.key}`);
+                    if (valEl) {
+                        valEl.textContent = `${m.value.toFixed(m.key === "errors" ? 2 : (m.key === "token_delay" ? 1 : 0))}${m.unit}`;
+                    }
+                });
+
+                // 2. Chart Update
+                const primaryVal = task.metrics[0].value;
+                chartHistory.push(primaryVal);
+                if (chartHistory.length > 15) {
+                    chartHistory.shift();
+                }
+                drawChart();
+
+                // 3. Log Update (randomly append logs)
+                if (Math.random() > 0.4) {
+                    const randomLog = task.logTemplate[Math.floor(Math.random() * task.logTemplate.length)];
+                    addLogLine(randomLog);
+                }
+            } else {
+                // For completed tasks, just shift chart slightly with minimal noise to show active monitor checks
+                chartHistory.push(chartHistory[chartHistory.length - 1] + (Math.random() * 0.2 - 0.1));
+                if (chartHistory.length > 15) {
+                    chartHistory.shift();
+                }
+                drawChart();
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

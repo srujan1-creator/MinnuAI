@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minnu AI - Login Portal</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --border-glass-focus: rgba(255, 255, 255, 0.2);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --brand-navy: #213a57;
+            --brand-copper: #af5d33;
+            --teal: #009688;
+            --teal-hover: #00bfa5;
+            --red: #ef4444;
+            --font-sans: 'Inter', sans-serif;
+            --font-heading: 'Outfit', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated background mesh */
+        .bg-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            background: radial-gradient(circle at 10% 20%, rgba(33, 58, 87, 0.6) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(175, 93, 51, 0.4) 0%, transparent 50%),
+                        radial-gradient(circle at 50% 50%, rgba(0, 150, 136, 0.2) 0%, transparent 60%);
+            filter: blur(80px);
+            animation: bgDrift 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes bgDrift {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.1) translate(2%, 2%); }
+        }
+
+        .portal-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 440px;
+            padding: 24px;
+        }
+
+        .brand-logo-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+            user-select: none;
+        }
+
+        .brand-logo-svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .brand-logo-text {
+            font-family: var(--font-heading);
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .text-minnu {
+            color: #ffffff;
+        }
+
+        .text-ai {
+            color: var(--brand-copper);
+        }
+
+        /* Glassmorphism Card */
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            padding: 32px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        /* Tab Bar */
+        .tab-bar {
+            display: flex;
+            border-bottom: 1px solid var(--border-glass);
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 12px 0;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            position: relative;
+            outline: none;
+        }
+
+        .tab-btn.active {
+            color: var(--text-primary);
+        }
+
+        .tab-indicator {
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 50%;
+            height: 2px;
+            background: var(--brand-copper);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Form Sections */
+        .form-content {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            position: relative;
+        }
+
+        .form-group label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper svg {
+            position: absolute;
+            left: 12px;
+            width: 16px;
+            height: 16px;
+            color: var(--text-secondary);
+            pointer-events: none;
+            transition: color 0.3s ease;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px 10px 38px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 0.88rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(0, 150, 136, 0.15);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .form-control:focus + svg {
+            color: var(--teal);
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 36px;
+        }
+
+        /* Password toggle */
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            outline: none;
+        }
+
+        .password-toggle:hover {
+            color: var(--text-primary);
+        }
+
+        .password-toggle svg {
+            position: static !important;
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Register Fields Container */
+        #register-fields {
+            display: none;
+            flex-direction: column;
+            gap: 18px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        #register-fields.show {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Action Buttons */
+        .btn-submit {
+            background: var(--brand-copper);
+            color: white;
+            font-family: var(--font-heading);
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 12px;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(175, 93, 51, 0.25);
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background: #c56e3f;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(175, 93, 51, 0.4);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .btn-submit:disabled {
+            background: rgba(175, 93, 51, 0.5);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            line-height: 1.4;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: #fca5a5;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            color: #a7f3d0;
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-gradient"></div>
+
+    <div class="portal-container">
+        <div class="brand-logo-section">
+            <!-- Phoenix SVG Symbol -->
+            <svg class="brand-logo-svg" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M192 140C165 200 160 280 230 330C280 365 340 330 340 330C340 330 300 300 270 290C240 280 220 250 240 210C260 170 300 160 310 140C290 150 260 180 250 210C240 230 215 250 195 240C175 230 175 180 192 140Z" fill="#af5d33"/>
+                <path d="M340 330C340 330 380 270 410 270C440 270 450 300 425 350C400 400 370 400 370 400" stroke="#af5d33" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M420 180C400 185 365 200 350 240C335 280 300 370 270 390C240 410 210 390 235 345C255 310 290 235 330 210" stroke="#213a57" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M398 185C408 170 428 172 428 172" stroke="#213a57" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M330 210C315 190 270 160 220 160" stroke="#213a57" stroke-width="24" stroke-linecap="round"/>
+                <path d="M310 240C290 220 250 195 200 200" stroke="#213a57" stroke-width="24" stroke-linecap="round"/>
+                <path d="M290 270C275 250 240 230 195 240" stroke="#213a57" stroke-width="24" stroke-linecap="round"/>
+            </svg>
+            <span class="brand-logo-text"><span class="text-minnu">Minnu</span> <span class="text-ai">AI</span></span>
+        </div>
+
+        <div class="glass-card">
+            <div class="tab-bar">
+                <button type="button" class="tab-btn active" id="tab-login">Sign In</button>
+                <button type="button" class="tab-btn" id="tab-register">Register</button>
+                <div class="tab-indicator" id="tab-indicator"></div>
+            </div>
+
+            <form id="auth-form">
+                <div class="form-content">
+                    <div id="feedback-alert" class="alert"></div>
+
+                    <!-- Shared Fields (Login and Register) -->
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <div class="input-wrapper">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            <input type="text" id="username" class="form-control" placeholder="Enter username" required autocomplete="username">
+                        </div>
+                    </div>
+
+                    <!-- Registration Fields Container -->
+                    <div id="register-fields">
+                        <div class="form-group">
+                            <label for="display-name">Display Name</label>
+                            <div class="input-wrapper">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
+                                </svg>
+                                <input type="text" id="display-name" class="form-control" placeholder="Your friendly name">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="role">Role Persona</label>
+                            <div class="input-wrapper">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                                </svg>
+                                <select id="role" class="form-control">
+                                    <option value="Lead Orchestrator">Lead Orchestrator</option>
+                                    <option value="Product Architect">Product Architect</option>
+                                    <option value="Code Synthesizer">Code Synthesizer</option>
+                                    <option value="Stability Guard">Stability Guard</option>
+                                    <option value="AI Engineer" selected>AI Engineer</option>
+                                    <option value="Prompt Engineer">Prompt Engineer</option>
+                                    <option value="ML Engineer">ML Engineer</option>
+                                    <option value="MLOps Engineer">MLOps Engineer</option>
+                                    <option value="Generative AI Developer">Generative AI Developer</option>
+                                    <option value="LLM Operations Engineer (LLMOps)">LLM Operations Engineer (LLMOps)</option>
+                                    <option value="AI Agent & Workflow Engineer">AI Agent & Workflow Engineer</option>
+                                    <option value="AI Research Engineer">AI Research Engineer</option>
+                                    <option value="AI Infrastructure Engineer">AI Infrastructure Engineer</option>
+                                    <option value="Vector DB & RAG Architect">Vector DB & RAG Architect</option>
+                                    <option value="Software Engineer">Software Engineer</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-wrapper">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                            <input type="password" id="password" class="form-control" placeholder="Enter password" required autocomplete="current-password">
+                            <button type="button" class="password-toggle" id="toggle-pwd" aria-label="Toggle password visibility">
+                                <svg id="pwd-eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                <svg id="pwd-eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="submit-btn">
+                        <span class="spinner" id="btn-spinner"></span>
+                        <span id="btn-text">Sign In</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Redirect if session exists
+        if (localStorage.getItem("minnu_session")) {
+            window.location.href = "index.html";
+        }
+
+        const tabLogin = document.getElementById("tab-login");
+        const tabRegister = document.getElementById("tab-register");
+        const tabIndicator = document.getElementById("tab-indicator");
+        const registerFields = document.getElementById("register-fields");
+        const displayNameInput = document.getElementById("display-name");
+        const roleSelect = document.getElementById("role");
+        const submitBtn = document.getElementById("submit-btn");
+        const btnText = document.getElementById("btn-text");
+        const btnSpinner = document.getElementById("btn-spinner");
+        const authForm = document.getElementById("auth-form");
+        const feedbackAlert = document.getElementById("feedback-alert");
+        const usernameInput = document.getElementById("username");
+        const passwordInput = document.getElementById("password");
+        const togglePwd = document.getElementById("toggle-pwd");
+        const pwdEyeOpen = document.getElementById("pwd-eye-open");
+        const pwdEyeClosed = document.getElementById("pwd-eye-closed");
+
+        let currentTab = "login"; // "login" or "register"
+
+        // Toggle password visibility
+        togglePwd.addEventListener("click", () => {
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                pwdEyeOpen.style.display = "none";
+                pwdEyeClosed.style.display = "block";
+            } else {
+                passwordInput.type = "password";
+                pwdEyeOpen.style.display = "block";
+                pwdEyeClosed.style.display = "none";
+            }
+        });
+
+        // Tab switches
+        tabLogin.addEventListener("click", () => {
+            if (currentTab === "login") return;
+            currentTab = "login";
+            tabLogin.classList.add("active");
+            tabRegister.classList.remove("active");
+            tabIndicator.style.transform = "translateX(0%)";
+            
+            // Hide register-only fields
+            registerFields.classList.remove("show");
+            setTimeout(() => {
+                if (currentTab === "login") registerFields.style.display = "none";
+            }, 300);
+
+            displayNameInput.required = false;
+            btnText.textContent = "Sign In";
+            clearAlert();
+        });
+
+        tabRegister.addEventListener("click", () => {
+            if (currentTab === "register") return;
+            currentTab = "register";
+            tabRegister.classList.add("active");
+            tabLogin.classList.remove("active");
+            tabIndicator.style.transform = "translateX(100%)";
+            
+            // Show register fields
+            registerFields.style.display = "flex";
+            // trigger reflow
+            registerFields.offsetHeight;
+            registerFields.classList.add("show");
+
+            displayNameInput.required = true;
+            btnText.textContent = "Create Account";
+            clearAlert();
+        });
+
+        function showAlert(msg, type = "error") {
+            feedbackAlert.textContent = msg;
+            feedbackAlert.className = `alert alert-${type}`;
+            feedbackAlert.style.display = "flex";
+        }
+
+        function clearAlert() {
+            feedbackAlert.textContent = "";
+            feedbackAlert.style.display = "none";
+        }
+
+        authForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            clearAlert();
+
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+
+            if (!username || !password) {
+                showAlert("Please enter username and password.");
+                return;
+            }
+
+            // UI loading state
+            submitBtn.disabled = true;
+            btnSpinner.style.display = "inline-block";
+            btnText.style.opacity = "0.7";
+
+            const endpoint = currentTab === "login" ? "/api/login" : "/api/register";
+            const payload = { username, password };
+
+            if (currentTab === "register") {
+                payload.name = displayNameInput.value.trim();
+                payload.role = roleSelect.value;
+            }
+
+            fetch(endpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+            .then(async res => {
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.error || "Authentication failed.");
+                }
+                return data;
+            })
+            .then(data => {
+                if (data.success) {
+                    showAlert(currentTab === "login" ? "Login successful! Redirecting..." : "Registration successful! Logging in...", "success");
+                    // Save user session
+                    localStorage.setItem("minnu_session", JSON.stringify(data.user));
+                    
+                    setTimeout(() => {
+                        window.location.href = "index.html";
+                    }, 1200);
+                } else {
+                    throw new Error("Invalid server response.");
+                }
+            })
+            .catch(err => {
+                console.error("Auth Error:", err);
+                showAlert(err.message || "An error occurred. Please try again.");
+                submitBtn.disabled = false;
+                btnSpinner.style.display = "none";
+                btnText.style.opacity = "1";
+            });
+        });
+    </script>
+</body>
+</html>
