@@ -1007,8 +1007,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function handleBotResponse(userText) {
         if (geminiApiKey) {
-            // Call live stable model gemini-1.5-flash
-            fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+            // Call live model gemini-2.5-flash
+            fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
