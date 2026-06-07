@@ -10,7 +10,7 @@
 
 **A premium multi-agent AI orchestration dashboard for the Agentic Barista App — featuring real-time mesh deployments, AI agent management, and a live Gemini-powered chat assistant.**
 
-[🌐 Live Demo](https://minnuai.onrender.com) · [📖 Documentation](#usage) · [🚀 Deploy Your Own](#deployment)
+[🌐 Live Demo](https://minnu-ai.onrender.com) · [📖 Documentation](#usage) · [🚀 Deploy Your Own](#deployment)
 
 </div>
 
