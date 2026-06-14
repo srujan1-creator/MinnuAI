@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        // Session Guard
+        if (!localStorage.getItem("minnu_session")) {
+            window.location.href = "login.html";
+        }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minnu AI - Barista Coffee Shop</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="style.css?v=1.1">
+    
+</head>
+<body>
+    <div class="dashboard-container">
+        
+        <div class="single-panel-layout">
+            <!-- Header Section -->
+            <header class="panel-header flex-column-start" style="border-radius: var(--radius-lg) var(--radius-lg) 0 0; border: 1px solid var(--border-color); border-bottom: none;">
+                <div class="brand-header-row">
+                    <div class="brand-logo-container">
+                        <!-- Phoenix SVG Symbol -->
+                        <svg class="brand-logo-svg" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M192 140C165 200 160 280 230 330C280 365 340 330 340 330C340 330 300 300 270 290C240 280 220 250 240 210C260 170 300 160 310 140C290 150 260 180 250 210C240 230 215 250 195 240C175 230 175 180 192 140Z" fill="#af5d33"/>
+                            <path d="M340 330C340 330 380 270 410 270C440 270 450 300 425 350C400 400 370 400 370 400" stroke="#af5d33" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M420 180C400 185 365 200 350 240C335 280 300 370 270 390C240 410 210 390 235 345C255 310 290 235 330 210" stroke="#213a57" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M398 185C408 170 428 172 428 172" stroke="#213a57" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M330 210C315 190 270 160 220 160" stroke="#213a57" stroke-width="24" stroke-linecap="round"/>
+                            <path d="M310 240C290 220 250 195 200 200" stroke="#213a57" stroke-width="24" stroke-linecap="round"/>
+                            <path d="M290 270C275 250 240 230 195 240" stroke="#213a57" stroke-width="24" stroke-linecap="round"/>
+                        </svg>
+                        <span class="brand-logo-text"><span class="text-minnu">Minnu</span> <span class="text-ai">AI</span></span>
+                    </div>
+                    <button class="profile-btn-red" aria-label="Profile Settings">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="active-user-badge" id="active-user-display" style="display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: var(--text-secondary); margin-top: -6px; font-weight: 500; user-select: none;">
+                    <span class="pulse-dot" style="width: 6px; height: 6px; background-color: var(--brand-copper); animation: dotPulse 2s infinite;"></span>
+                    Active Session: <strong id="active-user-name" style="color: var(--text-primary);">Admin Barista</strong> (<span id="active-user-role">Lead Orchestrator</span>)
+                </div>
+            </header>
+
+            <!-- Main Panel Content -->
+            <main class="panel left-panel active-panel" style="flex: 1; border-top: none; border-radius: 0 0 var(--radius-lg) var(--radius-lg); width: 100%;">
+                <div class="panel-content">
+                    
+                    <!-- Tabs for Barista UI -->
+                    <div class="barista-tabs">
+                        <button class="barista-tab-btn active" id="tab-menu-btn">Order Menu</button>
+                        <button class="barista-tab-btn" id="tab-consult-btn">Gemma 4 Consult</button>
+                        <button class="barista-tab-btn" id="tab-admin-btn">Admin Inventory</button>
+                    </div>
+                    
+                    <!-- View 1: Coffee Menu (Default) -->
+                    <div id="view-order-menu">
+                        <h4 style="font-size: 0.95rem; margin-bottom: 10px;">Select a Specialty Coffee:</h4>
+                        <div class="coffee-menu-grid">
+                            <!-- Espresso -->
+                            <div class="coffee-card" data-drink-id="1" data-base-price="3.00">
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                                        <h5 style="font-size: 0.95rem; font-weight: 700;">Espresso</h5>
+                                        <span style="font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700; color: var(--brand-copper);">$3.00</span>
+                                    </div>
+                                    <p style="font-size: 0.72rem; color: var(--text-secondary);">Rich, concentrated shot of pure espresso. Intense caffeine.</p>
+                                </div>
+                                <span style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 10px; display: inline-block;">Select &amp; Customize &rarr;</span>
+                            </div>
+                            <!-- Americano -->
+                            <div class="coffee-card" data-drink-id="2" data-base-price="3.50">
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                                        <h5 style="font-size: 0.95rem; font-weight: 700;">Americano</h5>
+                                        <span style="font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700; color: var(--brand-copper);">$3.50</span>
+                                    </div>
+                                    <p style="font-size: 0.72rem; color: var(--text-secondary);">Espresso shot diluted with hot purified water. Smooth &amp; bold.</p>
+                                </div>
+                                <span style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 10px; display: inline-block;">Select &amp; Customize &rarr;</span>
+                            </div>
+                            <!-- Latte -->
+                            <div class="coffee-card" data-drink-id="3" data-base-price="4.50">
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                                        <h5 style="font-size: 0.95rem; font-weight: 700;">Latte</h5>
+                                        <span style="font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700; color: var(--brand-copper);">$4.50</span>
+                                    </div>
+                                    <p style="font-size: 0.72rem; color: var(--text-secondary);">Espresso combined with steamed milk and a light layer of foam.</p>
+                                </div>
+                                <span style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 10px; display: inline-block;">Select &amp; Customize &rarr;</span>
+                            </div>
+                            <!-- Cappuccino -->
+                            <div class="coffee-card" data-drink-id="4" data-base-price="4.50">
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                                        <h5 style="font-size: 0.95rem; font-weight: 700;">Cappuccino</h5>
+                                        <span style="font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700; color: var(--brand-copper);">$4.50</span>
+                                    </div>
+                                    <p style="font-size: 0.72rem; color: var(--text-secondary);">Equal parts espresso, hot steamed milk, and rich thick milk foam.</p>
+                                </div>
+                                <span style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 10px; display: inline-block;">Select &amp; Customize &rarr;</span>
+                            </div>
+                            <!-- Signature Gemma 4 -->
+                            <div class="coffee-card" data-drink-id="5" data-base-price="6.50" style="border: 1.5px solid var(--gold); background: linear-gradient(135deg, var(--bg-panel) 0%, rgba(212,175,55,0.03) 100%);">
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                                        <h5 style="font-size: 0.95rem; font-weight: 800; color: var(--brand-navy);">Gemma 4 (Signature)</h5>
+                                        <span style="font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700; color: var(--brand-copper);">$6.50</span>
+                                    </div>
+                                    <p style="font-size: 0.72rem; color: var(--text-secondary);">Steamed oat milk, signature lavender syrup, and gold dust. Elite recipe.</p>
+                                </div>
+                                <span style="font-size: 0.68rem; font-weight: 700; color: var(--gold); text-transform: uppercase; margin-top: 10px; display: inline-block;">Specialty Customizer &rarr;</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- View 2: Gemma 4 Recommendation Consult -->
+                    <div id="view-consult" style="display: none;">
+                        <h4 style="font-size: 0.95rem; margin-bottom: 4px;">Gemma 4 Barista Consultation:</h4>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 12px;">Explain how you feel (e.g. tired, sweet treat, simple) to get a perfect drink recommendation.</p>
+                        
+                        <div class="chat-container-inner" style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; background: var(--bg-main); min-height: 180px; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div id="consult-chat-log" style="font-size: 0.8rem; overflow-y: auto; max-height: 140px; display: flex; flex-direction: column; gap: 8px;">
+                                <div style="color: var(--brand-navy); font-weight: 500;">🤖 <strong>Gemma 4</strong>: Hello! Tell me how you're feeling today or what kind of flavor profile you're craving, and I'll recommend the ideal drink.</div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 8px; margin-top: 12px;">
+                                <input type="text" id="consult-input" placeholder="Type how you feel... (e.g., tired, sweet, light)" style="flex: 1; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.8rem; outline: none; background: var(--bg-panel); color: var(--text-primary);">
+                                <button class="btn btn-primary" id="consult-submit-btn" style="padding: 8px 16px; margin: 0; background: var(--brand-navy); width: auto;">Ask</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- View 3: Admin Dashboard (Passcode Protected) -->
+                    <div id="view-admin-panel" style="display: none;">
+                        
+                        <!-- Passcode Gateway -->
+                        <div id="admin-passcode-gateway" style="text-align: center; padding: 20px 10px;">
+                            <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 6px;">Secure Admin Access</h4>
+                            <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 14px;">Enter the passcode configured in the PRD (`barista77`):</p>
+                            
+                            <div style="display: flex; justify-content: center; gap: 8px; max-width: 280px; margin: 0 auto;">
+                                <input type="password" id="admin-passcode-input" placeholder="Passcode..." style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.8rem; text-align: center; outline: none; background: var(--bg-panel); color: var(--text-primary);">
+                                <button class="btn btn-primary" id="admin-unlock-btn" style="margin: 0; padding: 8px 16px; width: auto;">Unlock</button>
+                            </div>
+                            <p id="admin-auth-error" style="color: var(--red); font-size: 0.72rem; margin-top: 8px; display: none;">Invalid passcode. Try again.</p>
+                        </div>
+                        
+                        <!-- Unlocked Admin Area -->
+                        <div id="admin-content-area" style="display: none; display: flex; flex-direction: column; gap: 16px;">
+                            
+                            <!-- Real-time Inventory Progress Bars -->
+                            <div class="card" style="padding: 16px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                    <h5 style="font-size: 0.88rem; font-weight: 700;">Real-time Stock Monitor</h5>
+                                    <button class="btn btn-secondary" id="restock-btn" style="padding: 4px 10px; margin: 0; font-size: 0.72rem; background: var(--brand-copper); color: white; border-color: var(--brand-copper); width: auto;">Restock All</button>
+                                </div>
+                                <div id="admin-inventory-list" style="display: flex; flex-direction: column; gap: 10px; font-size: 0.75rem;">
+                                    <!-- Dynamic Inventory items will insert here -->
+                                </div>
+                            </div>
+                            
+                            <!-- Sales Report -->
+                            <div class="card" style="padding: 16px;">
+                                <h5 style="font-size: 0.88rem; font-weight: 700; margin-bottom: 12px;">Sales Summary &amp; Analytics</h5>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                                    <div style="background: var(--bg-main); padding: 10px; border-radius: var(--radius-sm); text-align: center;">
+                                        <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700;">Total Transactions</div>
+                                        <div id="sales-count-val" style="font-size: 1.25rem; font-weight: 800; color: var(--brand-navy); font-family: var(--font-mono); margin-top: 4px;">0</div>
+                                    </div>
+                                    <div style="background: var(--bg-main); padding: 10px; border-radius: var(--radius-sm); text-align: center;">
+                                        <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700;">Total Revenue</div>
+                                        <div id="sales-revenue-val" style="font-size: 1.25rem; font-weight: 800; color: var(--brand-copper); font-family: var(--font-mono); margin-top: 4px;">$0.00</div>
+                                    </div>
+                                </div>
+                                
+                                <div style="font-size: 0.75rem;">
+                                    <div style="font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; font-size: 0.65rem;">Popular Orders Breakdown</div>
+                                    <div id="popular-drinks-list" style="display: flex; flex-direction: column; gap: 6px;">
+                                        <!-- Popular order stats -->
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+
+                </div>
+
+                <!-- Bottom Navigation -->
+                <nav class="bottom-nav" style="border-radius: 0 0 var(--radius-lg) var(--radius-lg);">
+                    <a href="index.html" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        <span>Hub</span>
+                    </a>
+                    <a href="meshes.html" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                        <span>Meshes</span>
+                    </a>
+                    <a href="agents.html" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <span>Agents</span>
+                    </a>
+                    <a href="barista.html" class="nav-item active">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="2" x2="6" y2="8"/><line x1="10" y1="2" x2="10" y2="8"/><line x1="14" y1="2" x2="14" y2="8"/></svg>
+                        <span>Barista</span>
+                    </a>
+                    <a href="settings.html" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        <span>Settings</span>
+                    </a>
+                </nav>
+            </main>
+        </div>
+
+    </div>
+
+    <!-- Profile Settings Modal -->
+    <div class="modal-backdrop" id="profile-modal">
+        <div class="modal-card card" style="max-width: 420px; width: 95%;">
+            <button class="modal-close-btn" id="profile-close-btn" aria-label="Close Settings">&times;</button>
+            <div class="modal-header">
+                <div class="modal-avatar" style="position: relative; overflow: hidden; cursor: pointer;" id="avatar-container">
+                    <img id="profile-modal-img" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                    <div id="profile-modal-placeholder" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #ef4444; color: white;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); color: white; font-size: 0.6rem; text-align: center; padding: 2px 0;">EDIT</div>
+                    <input type="file" id="profile-pic-input" accept="image/*" style="display: none;">
+                </div>
+                <div>
+                    <h3 style="font-size: 1.15rem; font-weight: 700;">Edit Profile</h3>
+                    <p style="font-size: 0.75rem; color: var(--text-secondary);">Manage session identifier metadata</p>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div>
+                        <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Display Name</label>
+                        <input type="text" id="profile-name-input" value="Admin Barista" style="width: 100%; padding: 8px 12px; margin-top: 4px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.8rem; outline: none; background: var(--bg-panel); color: var(--text-primary);">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Role Persona</label>
+                        <select id="profile-role-select" style="width: 100%; max-width: 100%; padding: 8px 10px; margin-top: 4px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.8rem; outline: none; background: var(--bg-panel); color: var(--text-primary); text-overflow: ellipsis; box-sizing: border-box;">
+                            <option value="Lead Orchestrator">Lead Orchestrator</option>
+                            <option value="Product Architect">Product Architect</option>
+                            <option value="Code Synthesizer">Code Synthesizer</option>
+                            <option value="Stability Guard">Stability Guard</option>
+                            <option value="AI Engineer">AI Engineer</option>
+                            <option value="Prompt Engineer">Prompt Engineer</option>
+                            <option value="ML Engineer">ML Engineer</option>
+                            <option value="MLOps Engineer">MLOps Engineer</option>
+                            <option value="Generative AI Developer">Generative AI Developer</option>
+                            <option value="LLM Operations Engineer (LLMOps)">LLM Operations Engineer (LLMOps)</option>
+                            <option value="AI Agent &amp; Workflow Engineer">AI Agent &amp; Workflow Engineer</option>
+                            <option value="AI Research Engineer">AI Research Engineer</option>
+                            <option value="AI Infrastructure Engineer">AI Infrastructure Engineer</option>
+                            <option value="Vector DB &amp; RAG Architect">Vector DB &amp; RAG Architect</option>
+                            <option value="Software Engineer">Software Engineer</option>
+                            <option value="Student">Student</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Session Scope</label>
+                        <p style="margin-top: 4px; font-size: 0.8rem; font-family: var(--font-mono); color: var(--text-secondary);">barista-solution-mesh-alpha</p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 16px;">
+                    <button class="btn btn-primary" id="save-profile-btn" style="background: #ef4444; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.15); flex: 1; margin: 0;">Save Profile</button>
+                    <button class="btn btn-secondary" id="logout-btn" style="flex: 1; margin: 0;">Log Out</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Drink Customizer Modal -->
+    <div class="modal-backdrop" id="customizer-modal">
+        <div class="modal-card card" style="max-width: 420px; width: 95%;">
+            <button class="modal-close-btn" id="customizer-close-btn" aria-label="Close Customizer">&times;</button>
+            <div class="modal-header">
+                <div class="modal-avatar" style="background: var(--brand-copper); display: flex; align-items: center; justify-content: center; color: white;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="2" x2="6" y2="8"/><line x1="10" y1="2" x2="10" y2="8"/><line x1="14" y1="2" x2="14" y2="8"/></svg>
+                </div>
+                <div>
+                    <h3 id="customizer-drink-name" style="font-size: 1.1rem; font-weight: 700;">Customize Drink</h3>
+                    <p id="customizer-base-price" style="font-size: 0.75rem; color: var(--text-secondary);">Base price: $3.00</p>
+                </div>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="customizer-drink-id">
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                    <!-- Size -->
+                    <div>
+                        <label style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Size Selector</label>
+                        <div class="option-pill-group" style="display: flex; gap: 8px; margin-top: 6px;">
+                            <button class="option-pill" data-size="S">Small (1.0x)</button>
+                            <button class="option-pill active" data-size="M">Medium (1.2x)</button>
+                            <button class="option-pill" data-size="L">Large (1.4x)</button>
+                        </div>
+                    </div>
+                    <!-- Milk -->
+                    <div id="milk-selection-container">
+                        <label style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Milk Customization</label>
+                        <div class="option-pill-group" style="display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap;">
+                            <button class="option-pill active" data-milk="Standard">Standard</button>
+                            <button class="option-pill" data-milk="Oat">Oat Milk</button>
+                            <button class="option-pill" data-milk="Soy">Soy Milk</button>
+                            <button class="option-pill" data-milk="None">No Milk</button>
+                        </div>
+                    </div>
+                    <!-- Sweetness -->
+                    <div>
+                        <label style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Sweetness Level</label>
+                        <div class="option-pill-group" style="display: flex; gap: 8px; margin-top: 6px;">
+                            <button class="option-pill" data-sweet="None">None</button>
+                            <button class="option-pill" data-sweet="Low">Low</button>
+                            <button class="option-pill active" data-sweet="Medium">Medium</button>
+                            <button class="option-pill" data-sweet="High">High</button>
+                        </div>
+                    </div>
+                    <!-- Extra Shots -->
+                    <div>
+                        <label style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Extra Espresso Shots</label>
+                        <div style="display: flex; align-items: center; gap: 12px; margin-top: 6px;">
+                            <button class="btn btn-secondary" id="shot-minus-btn" style="padding: 4px 10px; margin: 0; min-width: 32px; width: auto;">-</button>
+                            <span id="extra-shots-count" style="font-weight: 700; font-size: 1rem; min-width: 20px; text-align: center;">0</span>
+                            <button class="btn btn-secondary" id="shot-plus-btn" style="padding: 4px 10px; margin: 0; min-width: 32px; width: auto;">+</button>
+                            <span style="font-size: 0.75rem; color: var(--text-secondary);">(+$0.80 per shot)</span>
+                        </div>
+                    </div>
+                    
+                    <div style="border-top: 1px solid var(--border-color); padding-top: 14px; margin-top: 6px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 700; font-size: 0.9rem;">Estimated Total:</span>
+                        <span id="customizer-total-price" style="font-size: 1.15rem; font-weight: 800; color: var(--brand-copper);">$3.00</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 16px;">
+                    <button class="btn btn-primary" id="place-order-btn" style="background: #ef4444; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.15); flex: 1; margin: 0;">Place Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Brewing Simulation Modal -->
+    <div class="modal-backdrop" id="brewing-modal">
+        <div class="modal-card card" style="max-width: 400px; width: 95%; text-align: center; padding: 30px;">
+            <div class="coffee-cup-animation-container" style="margin: 0 auto 20px auto; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; position: relative;">
+                <div class="brewing-cup-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; color: var(--brand-copper);"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
+                </div>
+                <div class="steam-line" style="position: absolute; top: -10px; left: calc(50% - 10px); width: 2px; height: 10px; background: var(--text-muted); opacity: 0; animation: steamRise 1.5s infinite;"></div>
+                <div class="steam-line" style="position: absolute; top: -14px; left: calc(50%); width: 2px; height: 12px; background: var(--text-muted); opacity: 0; animation: steamRise 1.5s infinite 0.5s;"></div>
+                <div class="steam-line" style="position: absolute; top: -10px; left: calc(50% + 10px); width: 2px; height: 10px; background: var(--text-muted); opacity: 0; animation: steamRise 1.5s infinite 1s;"></div>
+            </div>
+            
+            <h3 id="brewing-status-title" style="font-size: 1.15rem; font-weight: 700; margin-bottom: 8px;">Grinding coffee beans...</h3>
+            <p id="brewing-status-desc" style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 20px;">Measuring exactly 15.0g beans</p>
+            
+            <div class="brewing-progress-bar-bg" style="width: 100%; height: 6px; background: var(--border-color); border-radius: 3px; overflow: hidden; margin-bottom: 12px;">
+                <div id="brewing-progress-bar" style="width: 0%; height: 100%; background: var(--brand-copper); transition: width 0.4s ease;"></div>
+            </div>
+            <div id="brewing-percentage" style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--brand-copper); font-weight: 700;">0%</div>
+        </div>
+    </div>
+
+    <!-- Receipt Modal -->
+    <div class="modal-backdrop" id="receipt-modal">
+        <div class="modal-card card" style="max-width: 360px; width: 95%; font-family: var(--font-sans);">
+            <button class="modal-close-btn" id="receipt-close-btn">&times;</button>
+            <div style="text-align: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 16px; margin-bottom: 16px;">
+                <div style="font-size: 1.5rem; margin-bottom: 6px;">☕</div>
+                <h3 style="font-size: 1.1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">Minnu AI Coffee</h3>
+                <p style="font-size: 0.72rem; color: var(--text-secondary);">Orchestrated Coffee Shop Simulator</p>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.8rem;">
+                <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-secondary);">Item:</span><strong id="receipt-item">Latte</strong></div>
+                <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-secondary);">Size:</span><strong id="receipt-size">Medium</strong></div>
+                <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-secondary);">Milk Custom:</span><strong id="receipt-milk">Oat Milk</strong></div>
+                <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-secondary);">Extra Shots:</span><strong id="receipt-shots">0</strong></div>
+                <div style="border-top: 1px dashed var(--border-color); margin-top: 8px; padding-top: 8px; display: flex; justify-content: space-between;"><span style="font-weight: 700;">Total Charged:</span><strong id="receipt-price" style="font-size: 1rem; color: var(--brand-copper);">$5.40</strong></div>
+            </div>
+            <button class="btn btn-primary" id="receipt-ok-btn" style="margin-top: 20px; width: 100%;">Enjoy Your Coffee!</button>
+        </div>
+    </div>
+
+    <!-- UI Core Script -->
+    <script src="app.js?v=1.2"></script>
+</body>
+</html>

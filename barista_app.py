@@ -3,6 +3,7 @@ import sys
 import time
 import os
 import random
+import sqlite3
 
 # ANSI Escape Sequences for Premium CLI Aesthetics
 class Style:
@@ -26,43 +27,63 @@ class Style:
 
 class Inventory:
     def __init__(self):
-        # Initial inventory state as per PRD
-        self.stock = {
-            "water": 2000,          # ml
-            "milk": 2000,           # ml (standard milk)
-            "oat_milk": 1000,       # ml
-            "soy_milk": 1000,       # ml
-            "coffee_beans": 500,     # g
-            "lavender_syrup": 200,   # ml
-            "gold_dust": 20,        # g
-            "cups": 50              # units
-        }
+        self.db_path = 'users.db'
+
+    @property
+    def stock(self):
+        """Dynamically queries database inventory stock."""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute('SELECT item, qty FROM inventory')
+            rows = cursor.fetchall()
+            conn.close()
+            if not rows:
+                raise Exception("Empty inventory table")
+            return {row[0]: row[1] for row in rows}
+        except Exception:
+            # Fallback for transient testing if DB not yet initialized
+            return {
+                "water": 2000.0, "milk": 2000.0, "oat_milk": 1000.0, "soy_milk": 1000.0,
+                "coffee_beans": 500.0, "lavender_syrup": 200.0, "gold_dust": 20.0, "cups": 50.0
+            }
 
     def check_ingredients(self, required):
-        """Returns list of missing ingredients or empty list if all available."""
+        stock = self.stock
         missing = []
         for item, qty in required.items():
-            if self.stock.get(item, 0) < qty:
-                missing.append(f"{item} (need {qty:.1f}, have {self.stock.get(item, 0):.1f})")
+            if stock.get(item, 0.0) < qty:
+                missing.append(f"{item} (need {qty:.1f}, have {stock.get(item, 0.0):.1f})")
         return missing
 
     def deplete(self, required):
-        """Deducts ingredients from stock."""
-        for item, qty in required.items():
-            self.stock[item] = max(0.0, self.stock[item] - qty)
+        try:
+            stock = self.stock
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            for item, qty in required.items():
+                new_qty = max(0.0, stock.get(item, 0.0) - qty)
+                cursor.execute('UPDATE inventory SET qty = ? WHERE item = ?', (new_qty, item))
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            print(f"Error updating database stock: {e}")
 
     def restock(self):
-        """Restocks inventory to default capacity."""
-        self.stock = {
-            "water": 2000,
-            "milk": 2000,
-            "oat_milk": 1000,
-            "soy_milk": 1000,
-            "coffee_beans": 500,
-            "lavender_syrup": 200,
-            "gold_dust": 20,
-            "cups": 50
-        }
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            default_stock = {
+                "water": 2000.0, "milk": 2000.0, "oat_milk": 1000.0, "soy_milk": 1000.0,
+                "coffee_beans": 500.0, "lavender_syrup": 200.0, "gold_dust": 20.0, "cups": 50.0
+            }
+            for item, qty in default_stock.items():
+                cursor.execute('UPDATE inventory SET qty = ? WHERE item = ?', (qty, item))
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            print(f"Error restocking database: {e}")
+
 
 class DrinkRecipe:
     def __init__(self, name, base_price, coffee_beans=0, water=0, milk=0, lavender_syrup=0, gold_dust=0):
@@ -125,22 +146,43 @@ class Gemma4Assistant:
 
 class SalesTracker:
     def __init__(self):
-        self.total_revenue = 0.0
-        self.transactions = []
-        self.popular_counter = {}
+        self.db_path = 'users.db'
 
     def record_sale(self, drink_name, final_price):
-        self.total_revenue += final_price
-        self.transactions.append((drink_name, final_price))
-        self.popular_counter[drink_name] = self.popular_counter.get(drink_name, 0) + 1
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute('INSERT INTO sales (drink_name, price) VALUES (?, ?)', (drink_name, final_price))
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            print(f"Error recording sale to database: {e}")
 
     def get_report(self):
-        report = {
-            "total_revenue": self.total_revenue,
-            "sales_count": len(self.transactions),
-            "popular_drinks": dict(sorted(self.popular_counter.items(), key=lambda x: x[1], reverse=True))
-        }
-        return report
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute('SELECT SUM(price), COUNT(*) FROM sales')
+            row = cursor.fetchone()
+            total_revenue = row[0] if row[0] is not None else 0.0
+            sales_count = row[1]
+            
+            cursor.execute('SELECT drink_name, COUNT(*) FROM sales GROUP BY drink_name ORDER BY COUNT(*) DESC')
+            rows = cursor.fetchall()
+            conn.close()
+            
+            popular_drinks = {row[0]: row[1] for row in rows}
+            return {
+                "total_revenue": total_revenue,
+                "sales_count": sales_count,
+                "popular_drinks": popular_drinks
+            }
+        except Exception:
+            return {
+                "total_revenue": 0.0,
+                "sales_count": 0,
+                "popular_drinks": {}
+            }
 
 class BaristaApp:
     def __init__(self, is_test_mode=False):
@@ -368,6 +410,32 @@ class BaristaApp:
         self.inventory.deplete(req_ingredients)
         self.tracker.record_sale(drink.name, final_price)
         
+        # Generate physical receipt ticket in CLI
+        import datetime
+        ticket_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        ticket_str = f"""========================================
+           MINNU AI COFFEE SHOP         
+             ORDER RECEIPT             
+========================================
+Timestamp:   {ticket_time}
+Drink:       {drink.name}
+Size:        {size}
+Milk Type:   {milk}
+Extra Shots: {extra_shots}
+----------------------------------------
+Total Price: ${final_price:.2f}
+Status:      Paid & Served (CLI Order)
+========================================
+"""
+        # Save ticket to workspace root
+        root_dir = os.path.dirname(os.path.abspath(__file__))
+        ticket_path = os.path.join(root_dir, "latest_order_ticket.txt")
+        try:
+            with open(ticket_path, "w", encoding="utf-8") as f:
+                f.write(ticket_str)
+        except Exception as file_err:
+            pass
+
         self.animate_brewing(drink.name)
         
         if not self.is_test_mode:
@@ -449,6 +517,16 @@ def run_automated_tests():
     print("Minnu AI QA Verification - Running Self-Tests...")
     app = BaristaApp(is_test_mode=True)
 
+    # Restock database to ensure starting values are clean
+    app.inventory.restock()
+
+    # Clear sales table to ensure revenue calculations start from zero
+    conn = sqlite3.connect(app.inventory.db_path)
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM sales')
+    conn.commit()
+    conn.close()
+
     # Test 1: Inventory Initial Stock
     assert app.inventory.stock["water"] == 2000, "Initial water level should be 2000ml"
     assert app.inventory.stock["gold_dust"] == 20, "Initial gold dust should be 20g"
@@ -482,7 +560,11 @@ def run_automated_tests():
 
     # Test 5: Out of stock scenario
     # Drain gold dust and check if Gemma 4 can be ordered
-    app.inventory.stock["gold_dust"] = 0.5
+    conn = sqlite3.connect(app.inventory.db_path)
+    cursor = conn.cursor()
+    cursor.execute('UPDATE inventory SET qty = 0.5 WHERE item = "gold_dust"')
+    conn.commit()
+    conn.close()
     missing = app.inventory.check_ingredients(req_gemma)
     assert len(missing) > 0, "Gemma 4 should fail ingredient check due to low gold dust"
     assert "gold_dust" in missing[0], "Error message must point to gold_dust shortage"

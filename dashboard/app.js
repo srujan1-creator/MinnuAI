@@ -1353,4 +1353,636 @@ async def generate_token(request: T...
             setTimeout(() => item.style.transform = "none", 150);
         });
     });
+
+    // ==========================================
+    // BARISTA COFFEE SHOP SECTION
+    // ==========================================
+    const tabMenuBtn = document.getElementById("tab-menu-btn");
+    const tabConsultBtn = document.getElementById("tab-consult-btn");
+    const tabAdminBtn = document.getElementById("tab-admin-btn");
+
+    const viewOrderMenu = document.getElementById("view-order-menu");
+    const viewConsult = document.getElementById("view-consult");
+    const viewAdminPanel = document.getElementById("view-admin-panel");
+
+    if (tabMenuBtn && tabConsultBtn && tabAdminBtn) {
+        const tabs = [
+            { btn: tabMenuBtn, view: viewOrderMenu },
+            { btn: tabConsultBtn, view: viewConsult },
+            { btn: tabAdminBtn, view: viewAdminPanel }
+        ];
+
+        let isAdminUnlocked = false;
+
+        tabs.forEach(t => {
+            t.btn.addEventListener("click", () => {
+                tabs.forEach(o => {
+                    o.btn.classList.remove("active");
+                    o.view.style.display = "none";
+                });
+                t.btn.classList.add("active");
+                t.view.style.display = "block";
+
+                if (t.btn === tabAdminBtn) {
+                    checkAdminAuth();
+                }
+            });
+        });
+
+        function checkAdminAuth() {
+            const gateway = document.getElementById("admin-passcode-gateway");
+            const content = document.getElementById("admin-content-area");
+            if (isAdminUnlocked) {
+                if (gateway) gateway.style.display = "none";
+                if (content) content.style.display = "flex";
+                loadAdminData();
+            } else {
+                if (gateway) gateway.style.display = "block";
+                if (content) content.style.display = "none";
+            }
+        }
+
+        const adminPasscodeInput = document.getElementById("admin-passcode-input");
+        const adminUnlockBtn = document.getElementById("admin-unlock-btn");
+        const adminAuthError = document.getElementById("admin-auth-error");
+
+        if (adminUnlockBtn && adminPasscodeInput) {
+            adminUnlockBtn.addEventListener("click", () => {
+                const passcode = adminPasscodeInput.value.trim();
+                if (passcode === "barista77") {
+                    isAdminUnlocked = true;
+                    if (adminAuthError) adminAuthError.style.display = "none";
+                    checkAdminAuth();
+                } else {
+                    if (adminAuthError) adminAuthError.style.display = "block";
+                    adminPasscodeInput.value = "";
+                }
+            });
+            adminPasscodeInput.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    adminUnlockBtn.click();
+                }
+            });
+        }
+
+        function loadAdminData() {
+            Promise.all([
+                fetch("/api/inventory").then(res => res.json()),
+                fetch("/api/sales_report").then(res => res.json())
+            ])
+            .then(([invData, salesData]) => {
+                if (invData.success && invData.inventory) {
+                    renderInventory(invData.inventory);
+                }
+                if (salesData.success && salesData.report) {
+                    renderSalesReport(salesData.report);
+                }
+            })
+            .catch(err => {
+                console.error("Failed to load admin data:", err);
+            });
+        }
+
+        function renderInventory(inv) {
+            const listEl = document.getElementById("admin-inventory-list");
+            if (!listEl) return;
+            listEl.innerHTML = "";
+
+            const peakCapacities = {
+                water: 2000.0,
+                milk: 2000.0,
+                oat_milk: 1000.0,
+                soy_milk: 1000.0,
+                coffee_beans: 500.0,
+                lavender_syrup: 200.0,
+                gold_dust: 20.0,
+                cups: 50.0
+            };
+
+            const units = {
+                water: "ml",
+                milk: "ml",
+                oat_milk: "ml",
+                soy_milk: "ml",
+                coffee_beans: "g",
+                lavender_syrup: "ml",
+                gold_dust: "g",
+                cups: "pcs"
+            };
+
+            Object.keys(peakCapacities).forEach(item => {
+                const qty = inv[item] !== undefined ? inv[item] : 0;
+                const maxVal = peakCapacities[item];
+                const pct = Math.min(100, Math.max(0, (qty / maxVal) * 100)).toFixed(1);
+                const unit = units[item];
+                const label = item.replace("_", " ").toUpperCase();
+
+                let barColor = "var(--brand-copper)";
+                if (pct < 20) {
+                    barColor = "var(--red)";
+                } else if (pct > 75) {
+                    barColor = "var(--green)";
+                }
+
+                const itemHtml = `
+                    <div class="inventory-item-row" style="margin-bottom: 8px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span style="font-weight: 600;">${label}</span>
+                            <span style="color: var(--text-secondary); font-family: var(--font-mono);">${qty.toFixed(1)} / ${maxVal} ${unit} (${pct}%)</span>
+                        </div>
+                        <div class="progress-bar-container" style="height: 6px; background: var(--border-color); border-radius: 3px; overflow: hidden;">
+                            <div class="progress-bar-fill" style="width: ${pct}%; height: 100%; background: ${barColor}; border-radius: 3px;"></div>
+                        </div>
+                    </div>
+                `;
+                listEl.insertAdjacentHTML("beforeend", itemHtml);
+            });
+        }
+
+        function renderSalesReport(report) {
+            const countEl = document.getElementById("sales-count-val");
+            const revenueEl = document.getElementById("sales-revenue-val");
+            const popularEl = document.getElementById("popular-drinks-list");
+
+            if (countEl) countEl.textContent = report.sales_count;
+            if (revenueEl) revenueEl.textContent = `$${parseFloat(report.total_revenue || 0).toFixed(2)}`;
+
+            if (popularEl) {
+                popularEl.innerHTML = "";
+                const popular = report.popular_drinks || {};
+                const sorted = Object.entries(popular);
+                
+                if (sorted.length === 0) {
+                    popularEl.innerHTML = `<div style="color: var(--text-muted); font-style: italic; font-size: 0.75rem; padding: 4px 0;">No sales recorded yet.</div>`;
+                    return;
+                }
+
+                sorted.forEach(([drink, count]) => {
+                    const drinkHtml = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-panel); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: var(--radius-sm); font-size: 0.75rem; margin-bottom: 4px;">
+                            <span style="font-weight: 500;">${drink}</span>
+                            <span style="font-family: var(--font-mono); font-weight: 700; color: var(--brand-navy);">${count} orders</span>
+                        </div>
+                    `;
+                    popularEl.insertAdjacentHTML("beforeend", drinkHtml);
+                });
+            }
+        }
+
+        const restockBtn = document.getElementById("restock-btn");
+        if (restockBtn) {
+            restockBtn.addEventListener("click", () => {
+                restockBtn.disabled = true;
+                const originalText = restockBtn.textContent;
+                restockBtn.textContent = "Restocking...";
+
+                fetch("/api/inventory/restock", { method: "POST" })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        loadAdminData();
+                    } else {
+                        alert("Failed to restock: " + (data.error || "Unknown error"));
+                    }
+                })
+                .catch(err => {
+                    console.error("Restocking error:", err);
+                    alert("Network error restocking inventory.");
+                })
+                .finally(() => {
+                    restockBtn.disabled = false;
+                    restockBtn.textContent = originalText;
+                });
+            });
+        }
+
+        const coffeeCards = document.querySelectorAll(".coffee-card");
+        const customizerModal = document.getElementById("customizer-modal");
+        const customizerCloseBtn = document.getElementById("customizer-close-btn");
+
+        let selectedDrinkId = "";
+        let selectedBasePrice = 0.0;
+        let selectedDrinkName = "";
+        let selectedSize = "M";
+        let selectedMilk = "Standard";
+        let selectedSweet = "Medium";
+        let extraShotsCount = 0;
+
+        coffeeCards.forEach(card => {
+            card.addEventListener("click", () => {
+                const drinkId = card.getAttribute("data-drink-id");
+                const basePrice = parseFloat(card.getAttribute("data-base-price"));
+                const name = card.querySelector("h5").textContent.trim();
+
+                openCustomizer(drinkId, name, basePrice);
+            });
+        });
+
+        function openCustomizer(drinkId, name, basePrice) {
+            selectedDrinkId = drinkId;
+            selectedDrinkName = name;
+            selectedBasePrice = basePrice;
+            
+            selectedSize = "M";
+            selectedMilk = "Standard";
+            selectedSweet = "Medium";
+            extraShotsCount = 0;
+
+            const nameEl = document.getElementById("customizer-drink-name");
+            const priceEl = document.getElementById("customizer-base-price");
+            const shotsEl = document.getElementById("extra-shots-count");
+            const idInput = document.getElementById("customizer-drink-id");
+
+            if (idInput) idInput.value = drinkId;
+            if (nameEl) nameEl.textContent = name;
+            if (priceEl) priceEl.textContent = `Base price: $${basePrice.toFixed(2)}`;
+            if (shotsEl) shotsEl.textContent = "0";
+
+            updatePillActiveState("size", selectedSize);
+            updatePillActiveState("milk", selectedMilk);
+            updatePillActiveState("sweet", selectedSweet);
+
+            const milkContainer = document.getElementById("milk-selection-container");
+            if (milkContainer) {
+                if (name.includes("Gemma 4")) {
+                    milkContainer.style.display = "none";
+                    selectedMilk = "Oat";
+                } else if (name.includes("Espresso") || name.includes("Americano")) {
+                    milkContainer.style.display = "none";
+                    selectedMilk = "None";
+                } else {
+                    milkContainer.style.display = "block";
+                    selectedMilk = "Standard";
+                    updatePillActiveState("milk", selectedMilk);
+                }
+            }
+
+            calculateCustomizerPrice();
+            
+            if (customizerModal) customizerModal.classList.add("show");
+        }
+
+        document.querySelectorAll("#customizer-modal [data-size]").forEach(pill => {
+            pill.addEventListener("click", () => {
+                selectedSize = pill.getAttribute("data-size");
+                updatePillActiveState("size", selectedSize);
+                calculateCustomizerPrice();
+            });
+        });
+
+        document.querySelectorAll("#customizer-modal [data-milk]").forEach(pill => {
+            pill.addEventListener("click", () => {
+                selectedMilk = pill.getAttribute("data-milk");
+                updatePillActiveState("milk", selectedMilk);
+                calculateCustomizerPrice();
+            });
+        });
+
+        document.querySelectorAll("#customizer-modal [data-sweet]").forEach(pill => {
+            pill.addEventListener("click", () => {
+                selectedSweet = pill.getAttribute("data-sweet");
+                updatePillActiveState("sweet", selectedSweet);
+                calculateCustomizerPrice();
+            });
+        });
+
+        function updatePillActiveState(type, value) {
+            document.querySelectorAll(`#customizer-modal [data-${type}]`).forEach(pill => {
+                if (pill.getAttribute(`data-${type}`) === value) {
+                    pill.classList.add("active");
+                } else {
+                    pill.classList.remove("active");
+                }
+            });
+        }
+
+        const shotMinusBtn = document.getElementById("shot-minus-btn");
+        const shotPlusBtn = document.getElementById("shot-plus-btn");
+        const extraShotsCountEl = document.getElementById("extra-shots-count");
+
+        if (shotMinusBtn && shotPlusBtn && extraShotsCountEl) {
+            shotMinusBtn.addEventListener("click", () => {
+                if (extraShotsCount > 0) {
+                    extraShotsCount--;
+                    extraShotsCountEl.textContent = extraShotsCount;
+                    calculateCustomizerPrice();
+                }
+            });
+
+            shotPlusBtn.addEventListener("click", () => {
+                if (extraShotsCount < 3) {
+                    extraShotsCount++;
+                    extraShotsCountEl.textContent = extraShotsCount;
+                    calculateCustomizerPrice();
+                }
+            });
+        }
+
+        function calculateCustomizerPrice() {
+            let sizeMult = 1.2;
+            if (selectedSize === "S") sizeMult = 1.0;
+            if (selectedSize === "L") sizeMult = 1.4;
+
+            const finalPrice = selectedBasePrice * sizeMult + (extraShotsCount * 0.80);
+            const totalEl = document.getElementById("customizer-total-price");
+            if (totalEl) totalEl.textContent = `$${finalPrice.toFixed(2)}`;
+        }
+
+        if (customizerCloseBtn && customizerModal) {
+            customizerCloseBtn.addEventListener("click", () => {
+                customizerModal.classList.remove("show");
+            });
+        }
+
+        const placeOrderBtn = document.getElementById("place-order-btn");
+        if (placeOrderBtn) {
+            placeOrderBtn.addEventListener("click", () => {
+                placeOrderBtn.disabled = true;
+                const originalText = placeOrderBtn.textContent;
+                placeOrderBtn.textContent = "Ordering...";
+
+                fetch("/api/order", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        drink_id: selectedDrinkId,
+                        size: selectedSize,
+                        milk_type: selectedMilk,
+                        extra_shots: extraShotsCount
+                    })
+                })
+                .then(async res => {
+                    const data = await res.json();
+                    if (!res.ok) {
+                        throw new Error(data.error || "Order failed.");
+                    }
+                    return data;
+                })
+                .then(data => {
+                    if (data.success) {
+                        if (customizerModal) customizerModal.classList.remove("show");
+                        animateBrewing(data.drink_name, data.receipt);
+                        if (isAdminUnlocked) {
+                            loadAdminData();
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error("Order error:", err);
+                    alert(`Order failed: ${err.message}`);
+                })
+                .finally(() => {
+                    placeOrderBtn.disabled = false;
+                    placeOrderBtn.textContent = originalText;
+                });
+            });
+        }
+
+        function animateBrewing(drinkName, receiptData) {
+            const brewingModal = document.getElementById("brewing-modal");
+            const statusTitle = document.getElementById("brewing-status-title");
+            const statusDesc = document.getElementById("brewing-status-desc");
+            const progressBar = document.getElementById("brewing-progress-bar");
+            const percentageEl = document.getElementById("brewing-percentage");
+
+            if (!brewingModal) return;
+            brewingModal.classList.add("show");
+
+            const steps = [
+                { title: "Grinding coffee beans...", desc: "Measuring exactly 15.0g beans" },
+                { title: "Heating water...", desc: "Heating filtered water to optimal 94°C" },
+                { title: "Extracting espresso...", desc: "Extracting rich espresso crema at 9 bar pressure" }
+            ];
+
+            if (drinkName.includes("Latte") || drinkName.includes("Cappuccino") || drinkName.includes("Gemma 4")) {
+                steps.push({ title: "Frothing milk...", desc: "Steaming milk into silky microfoam" });
+            } else {
+                steps.push({ title: "Diluting espresso...", desc: "Adding hot purified water to shot" });
+            }
+
+            if (drinkName.includes("Gemma 4")) {
+                steps.push({ title: "Adding toppings...", desc: "Adding premium lavender syrup and edible gold dust" });
+            }
+
+            steps.push({ title: "Finishing cup...", desc: "Assembling the perfect brew" });
+
+            let currentStepIndex = 0;
+            const totalSteps = steps.length;
+            const totalDuration = 4500; 
+            const startTime = Date.now();
+
+            progressBar.style.width = "0%";
+            percentageEl.textContent = "0%";
+
+            function updateProgress() {
+                const elapsed = Date.now() - startTime;
+                const pct = Math.min(100, Math.floor((elapsed / totalDuration) * 100));
+                progressBar.style.width = `${pct}%`;
+                percentageEl.textContent = `${pct}%`;
+
+                const stepIdx = Math.min(totalSteps - 1, Math.floor((elapsed / totalDuration) * totalSteps));
+                if (steps[stepIdx]) {
+                    statusTitle.textContent = steps[stepIdx].title;
+                    statusDesc.textContent = steps[stepIdx].desc;
+                }
+
+                if (elapsed < totalDuration) {
+                    requestAnimationFrame(updateProgress);
+                } else {
+                    progressBar.style.width = "100%";
+                    percentageEl.textContent = "100%";
+                    statusTitle.textContent = "Brew complete!";
+                    statusDesc.textContent = "Your coffee is ready to serve.";
+
+                    setTimeout(() => {
+                        brewingModal.classList.remove("show");
+                        showReceipt(receiptData);
+                    }, 600);
+                }
+            }
+
+            requestAnimationFrame(updateProgress);
+        }
+
+        function showReceipt(receipt) {
+            const receiptModal = document.getElementById("receipt-modal");
+            if (!receiptModal) return;
+
+            const itemEl = document.getElementById("receipt-item");
+            const sizeEl = document.getElementById("receipt-size");
+            const milkEl = document.getElementById("receipt-milk");
+            const shotsEl = document.getElementById("receipt-shots");
+            const priceEl = document.getElementById("receipt-price");
+
+            if (itemEl) itemEl.textContent = receipt.drink;
+            if (sizeEl) sizeEl.textContent = receipt.size === "S" ? "Small" : (receipt.size === "L" ? "Large" : "Medium");
+            if (milkEl) milkEl.textContent = receipt.milk;
+            if (shotsEl) shotsEl.textContent = receipt.extra_shots;
+            if (priceEl) priceEl.textContent = `$${parseFloat(receipt.price).toFixed(2)}`;
+
+            receiptModal.classList.add("show");
+        }
+
+        const receiptModal = document.getElementById("receipt-modal");
+        const receiptCloseBtn = document.getElementById("receipt-close-btn");
+        const receiptOkBtn = document.getElementById("receipt-ok-btn");
+        
+        if (receiptCloseBtn && receiptModal) {
+            receiptCloseBtn.addEventListener("click", () => {
+                receiptModal.classList.remove("show");
+            });
+        }
+        if (receiptOkBtn && receiptModal) {
+            receiptOkBtn.addEventListener("click", () => {
+                receiptModal.classList.remove("show");
+            });
+        }
+
+        // ==========================================
+        // GEMMA 4 ASSISTANT CONSULTATION CHAT
+        // ==========================================
+        const consultInput = document.getElementById("consult-input");
+        const consultSubmitBtn = document.getElementById("consult-submit-btn");
+        const consultChatLog = document.getElementById("consult-chat-log");
+
+        if (consultSubmitBtn && consultInput && consultChatLog) {
+            consultSubmitBtn.addEventListener("click", () => {
+                const text = consultInput.value.trim();
+                if (!text) return;
+
+                appendConsultMessage("user", text);
+                consultInput.value = "";
+
+                const loadingId = appendConsultLoading();
+
+                if (geminiApiKey) {
+                    fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{
+                                    text: `You are Gemma 4, a friendly and highly intelligent AI Barista Assistant in the Minnu AI Workspace. 
+                                    The user is asking for a coffee recommendation or has a coffee-related question.
+                                    The menu contains:
+                                    - Espresso ($3.00): Coffee Beans (15g), Water (50ml).
+                                    - Americano ($3.50): Coffee Beans (15g), Water (200ml).
+                                    - Latte ($4.50): Coffee Beans (15g), Water (50ml), Milk (150ml).
+                                    - Cappuccino ($4.50): Coffee Beans (15g), Water (50ml), Milk (100ml).
+                                    - Gemma 4 (Signature, $6.50): Coffee Beans (30g), Water (80ml), Oat Milk (150ml), Lavender Syrup (15ml), Gold Dust (1g).
+                                    Provide a brief, elegant drink recommendation based on their input: "${text}". Make sure to recommend one of our menu items and explain why. Keep it under 3 sentences.`
+                                }]
+                            }]
+                        })
+                    })
+                    .then(res => {
+                        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+                        return res.json();
+                    })
+                    .then(data => {
+                        removeConsultLoading(loadingId);
+                        let reply = "";
+                        try {
+                            reply = data.candidates[0].content.parts[0].text;
+                        } catch (e) {
+                            reply = "Received unexpected response format from Gemini API.";
+                        }
+                        appendConsultMessage("bot", reply);
+                    })
+                    .catch(err => {
+                        console.error("Gemini API error in consult:", err);
+                        removeConsultLoading(loadingId);
+                        const offlineReply = getOfflineConsultResponse(text);
+                        appendConsultMessage("bot", `❌ [Gemini API Error: ${err.message}. Falling back to offline assistant.]\n\n${offlineReply}`);
+                    });
+                } else {
+                    setTimeout(() => {
+                        removeConsultLoading(loadingId);
+                        const offlineReply = getOfflineConsultResponse(text);
+                        appendConsultMessage("bot", `🔑 [Offline Mode] Enter a Gemini API Key in the Settings page to unlock live responses!\n\n${offlineReply}`);
+                    }, 1000);
+                }
+            });
+
+            consultInput.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    consultSubmitBtn.click();
+                }
+            });
+        }
+
+        function appendConsultMessage(sender, message) {
+            const msgDiv = document.createElement("div");
+            if (sender === "user") {
+                msgDiv.style.alignSelf = "flex-end";
+                msgDiv.style.background = "var(--brand-copper)";
+                msgDiv.style.color = "white";
+                msgDiv.style.padding = "8px 12px";
+                msgDiv.style.borderRadius = "var(--radius-sm)";
+                msgDiv.style.borderTopRightRadius = "0";
+                msgDiv.style.maxWidth = "85%";
+                msgDiv.style.margin = "4px 0";
+                msgDiv.innerHTML = `<strong>You</strong>: ${message}`;
+            } else {
+                msgDiv.style.alignSelf = "flex-start";
+                msgDiv.style.color = "var(--text-primary)";
+                msgDiv.style.background = "var(--bg-panel)";
+                msgDiv.style.border = "1px solid var(--border-color)";
+                msgDiv.style.padding = "8px 12px";
+                msgDiv.style.borderRadius = "var(--radius-sm)";
+                msgDiv.style.borderTopLeftRadius = "0";
+                msgDiv.style.maxWidth = "85%";
+                msgDiv.style.margin = "4px 0";
+                msgDiv.innerHTML = `🤖 <strong>Gemma 4</strong>: ${message}`;
+            }
+            consultChatLog.appendChild(msgDiv);
+            consultChatLog.scrollTop = consultChatLog.scrollHeight;
+        }
+
+        function appendConsultLoading() {
+            const loadingId = "consult-loading-" + Date.now();
+            const loader = document.createElement("div");
+            loader.id = loadingId;
+            loader.style.alignSelf = "flex-start";
+            loader.className = "typing-indicator";
+            loader.style.margin = "4px 0";
+            loader.innerHTML = `
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+            `;
+            consultChatLog.appendChild(loader);
+            consultChatLog.scrollTop = consultChatLog.scrollHeight;
+            return loadingId;
+        }
+
+        function removeConsultLoading(id) {
+            const loader = document.getElementById(id);
+            if (loader) loader.remove();
+        }
+
+        function getOfflineConsultResponse(text) {
+            const promptLower = text.toLowerCase();
+            const responses = {
+                "tired": "Sounds like you need a high-power performance boost! I recommend our signature Gemma 4. Packed with a double-espresso kick, lavender syrup, and literal gold dust to revitalize your day.",
+                "sleepy": "Need to awaken your synapses? Our signature Gemma 4 will get you going with a rich double shot of espresso and velvet-smooth oat milk!",
+                "energy": "Keep it raw and intense. An Espresso is the fastest way to refuel your mental buffer.",
+                "sweet": "Craving a delightful flavor profile? The Gemma 4 signature includes lavender syrup for a perfect floral sweetness.",
+                "treat": "Treat yourself to luxury! The signature Gemma 4 with premium gold dust is the ultimate indulgence.",
+                "sugar": "A classic milk-textured Latte with sugar should satisfy that sweet tooth perfectly.",
+                "light": "For a clean, sugar-free, and refreshing option, I highly recommend an Americano.",
+                "healthy": "An Americano is low calorie and purely functional. Excellent choice.",
+                "simple": "A simple, strong, single shot of Espresso is pure coffee essence.",
+                "creamy": "A smooth, creamy Latte with steamed milk will feel like a warm hug.",
+                "smooth": "A velvety Cappuccino with thick microfoam is perfectly balanced and smooth."
+            };
+
+            for (const [key, value] of Object.entries(responses)) {
+                if (promptLower.includes(key)) {
+                    return value;
+                }
+            }
+            return "Welcome to Minnu AI Workspace! I recommend trying our brand new signature Gemma 4. It's carefully balanced to inspire creativity and focus.";
+        }
+    }
 });
