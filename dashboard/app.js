@@ -1248,9 +1248,58 @@ document.addEventListener("DOMContentLoaded", () => {
             bannerChartLine.setAttribute("d", linePathD);
             bannerChartFill.setAttribute("d", fillPathD);
         }
+        
+        // Update barista hub metrics
+        updateHubBaristaMetrics();
+    }
+
+    function updateHubBaristaMetrics() {
+        const revenueVal = document.getElementById("hub-barista-revenue-val");
+        const stockPct = document.getElementById("hub-barista-stock-pct");
+        if (!revenueVal && !stockPct) return;
+
+        Promise.all([
+            fetch("/api/inventory").then(res => res.json()),
+            fetch("/api/sales_report").then(res => res.json())
+        ])
+        .then(([invData, salesData]) => {
+            if (salesData.success && salesData.report) {
+                const rev = salesData.report.total_revenue || 0;
+                revenueVal.innerHTML = `$${Number(rev).toFixed(2)} <span class="metric-sub">sales logged</span>`;
+            }
+            if (invData.success && invData.inventory) {
+                const inv = invData.inventory;
+                const peakCapacities = {
+                    water: 2000.0,
+                    milk: 2000.0,
+                    oat_milk: 1000.0,
+                    soy_milk: 1000.0,
+                    coffee_beans: 500.0,
+                    lavender_syrup: 200.0,
+                    gold_dust: 20.0,
+                    cups: 50.0
+                };
+                let totalPct = 0;
+                let count = 0;
+                for (const key in peakCapacities) {
+                    if (inv[key] !== undefined) {
+                        const cap = peakCapacities[key];
+                        const qty = inv[key];
+                        totalPct += (qty / cap) * 100;
+                        count++;
+                    }
+                }
+                const avgPct = count > 0 ? Math.min(100, Math.max(0, totalPct / count)) : 100;
+                stockPct.style.width = `${avgPct}%`;
+            }
+        })
+        .catch(err => {
+            console.error("Failed to update hub barista metrics:", err);
+        });
     }
 
     // Run telemetry updates
+    updateHubBaristaMetrics();
     setInterval(updateTelemetry, 2500);
 
     // ================= 8. VIEW DIFF TOGGLE LOGIC =================
