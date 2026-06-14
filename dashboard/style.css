@@ -1641,6 +1641,10 @@ body.dark-theme .text-minnu {
     transition: max-width 0.3s ease;
 }
 
+.single-panel-layout .panel {
+    height: 0;
+}
+
 @media (min-width: 900px) {
     .single-panel-layout {
         max-width: 900px;
