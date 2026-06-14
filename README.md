@@ -21,11 +21,12 @@
 | Feature | Description |
 |---|---|
 | 🤖 **Multi-Agent Orchestration** | Real-time simulation of Product Architect, Code Synthesizer, and Stability Guard agents |
-| ☕ **Barista App Integration** | Full Python barista simulator with inventory management, recipe scaling, and order processing |
+| ☕ **Barista Web Coffee Shop** | Interactive web shop with drink selector cards, customizer modal, and live brewing progress bar |
+| 📊 **Shared DB State Sync** | Real-time database depletion syncing between the Python CLI app and the Web Dashboard |
 | 🔐 **Secure Auth System** | User registration/login with SHA-256 password hashing and SQLite persistence |
 | 📸 **Profile Picture Upload** | Base64 image encoding — upload, preview, and persist profile photos across all pages |
 | 🌐 **Mesh Deployment Monitor** | Live deployment progress bar, throughput charts, and real-time console logs |
-| 🤖 **Gemini AI Chat** | Floating assistant powered by Gemini 1.5 Flash API (or offline fallback mode) |
+| 🤖 **Gemini AI Chat** | Floating assistant powered by Gemini 2.5 Flash API (or offline fallback mode) |
 | 🎨 **Dark / Light Mode** | Toggle themes with smooth transitions — persisted across sessions |
 | 📊 **Live Telemetry** | Real-time latency sparklines, CPU load metrics, query counters, and network health |
 | ⚙️ **Agent Profile Cards** | Filterable agent directory with capability lists and live workload charts |
@@ -74,10 +75,10 @@ MinnuAI/
 ### Tech Stack
 
 - **Backend**: Python 3 standard library (`http.server`, `sqlite3`, `socketserver`, `hashlib`)
-- **Database**: SQLite 3 (file-based, zero configuration)
+- **Database**: SQLite 3 (shared file-based persistence for both Web and CLI Barista modules)
 - **Frontend**: Vanilla HTML5 + CSS3 + JavaScript (no frameworks, no build step)
 - **Fonts**: Google Fonts — Inter, Outfit, Fira Code
-- **AI**: Gemini 2.5 Flash API (optional, for live chat responses)
+- **AI**: Gemini 2.5 Flash API (used for live chatbot coffee consults)
 
 ---
 
@@ -120,6 +121,7 @@ python server.py
 | 🏠 Hub | `/index.html` | Main dashboard with metrics and deployment timeline |
 | 🔷 Meshes | `/meshes.html` | Live mesh deployment monitor with console logs |
 | 🤖 Agents | `/agents.html` | Agent directory with search, filter, and profile cards |
+| ☕ Barista | `/barista.html` | Interactive coffee shop customizer, brewing animation, and admin stock reports |
 | ⚙️ Settings | `/settings.html` | Theme, latency, simulation speed, API key |
 | 🔐 Login | `/login.html` | Authentication (auto-redirects if not logged in) |
 
@@ -136,16 +138,16 @@ python server.py
 4. Timeline cards appear as agents complete their tasks
 
 ### Using the AI Assistant
-1. Click the **floating chat bubble** (bottom-right)
-2. Ask questions about the barista app, coffee recipes, or the AI agents
-3. **With Gemini API Key**: Live responses from Gemini 1.5 Flash
-4. **Without API key**: Smart offline fallback responses
+1. Click the **floating chat bubble** (bottom-right) or consult Gemma 4 on the **Barista** page.
+2. Ask questions or describe how you are feeling to get coffee recommendations.
+3. **With Gemini API Key**: Live responses from Gemini 2.5 Flash.
+4. **Without API key**: Smart offline fallback responses.
 
 ### Setting Up Gemini AI (Optional)
-1. Go to **Settings** page
-2. Enter your [Gemini API Key](https://makersuite.google.com/app/apikey)
-3. Click **Apply Settings**
-4. The chat assistant will now use live Gemini AI responses
+1. Go to **Settings** page.
+2. Enter your [Gemini API Key](https://makersuite.google.com/app/apikey).
+3. Click **Apply Settings**.
+4. The chat assistant will now use live Gemini 2.5 Flash responses.
 
 ---
 
